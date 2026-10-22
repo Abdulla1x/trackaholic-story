@@ -182,6 +182,11 @@ select { font: inherit; color: var(--ink); background: var(--field); border: 1.5
 .stage .handle { position: absolute; top: 0; bottom: 0; left: var(--cut, 50%); width: 2px; background: var(--plan); transform: translateX(-1px); pointer-events: none; }
 .stage .missing { padding: 60px 20px; text-align: center; color: var(--ink-2); font-size: 14px; }
 .range { width: 100%; accent-color: var(--plan); }
+/* Phone / Desktop: each frame on screen grows or shrinks to its new size; thumbnails fade in as they arrive */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .25s; }
+::view-transition-group(*) { animation-duration: .45s; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+.shot button img { transition: opacity .25s ease; }
+.shot button img.wait { opacity: 0; }
 .cmp-hint { font-size: 13px; color: var(--ink-2); text-align: center; }
 
 /* checkpoints */
@@ -219,6 +224,9 @@ select { font: inherit; color: var(--ink); background: var(--field); border: 1.5
 .lk-tile { position: relative; overflow: hidden; }
 .lk-tile img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .lk-tile img:not(.ready) { opacity: .4; }
+/* the look being replaced stays on top until the new one has loaded, then fades */
+.lk-tile img.lk-old { opacity: .82; transition: opacity .2s ease; pointer-events: none; }
+.lk-tile img.lk-old.go { opacity: 0; }
 .lk-tile .lk-wait { position: absolute; inset: 0; display: grid; place-items: start center; padding-top: 80px; color: var(--ink-2); font-size: 14px; }
 .lk-tile img.ready + .lk-wait { display: none; }
 .lk-cap { font-size: 13px; color: var(--ink-2); }
@@ -810,8 +818,7 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
       width = pair[0];
       try { localStorage.setItem('tt-width', width); } catch (e) {}
       seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.w === width)); });
-      renderTimeline(); renderCompare();
-      if (lively()) arm();
+      swapWidth(function () { renderTimeline(); renderCompare(); if (lively()) arm(); });
     });
     seg.appendChild(b);
   });
@@ -830,7 +837,12 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
   function stillView(cp, page, w, alt, lazy, sizes) {
     var base = stillBase(cp, page, w);
     var attrs = { alt: alt, decoding: 'async' };
-    if (lazy) { attrs.loading = 'lazy'; attrs.src = base + '-t.webp'; return el('img', attrs); }
+    if (lazy) {
+      attrs.loading = 'lazy'; attrs.src = base + '-t.webp'; attrs.class = 'wait';
+      var thumb = el('img', attrs), shown = function () { thumb.classList.remove('wait'); };
+      thumb.addEventListener('load', shown); thumb.addEventListener('error', shown);
+      return thumb;
+    }
     if ((cp.wide || w === 'desktop') && !NO2X[base]) { attrs.srcset = base + '.webp 1280w, ' + base + '-2x.webp 2560w'; attrs.sizes = sizes; }
     attrs.src = base + '.webp';
     return el('img', attrs);
@@ -927,7 +939,25 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     var tile = el('div', { class: 'lk-tile' }, [img, el('span', { class: 'lk-wait', text: 'Loading…' })]);
     scroll.appendChild(tile);
     var cap = el('p', { class: 'lk-cap', 'aria-live': 'polite' });
-    img.addEventListener('load', function () { img.classList.add('ready'); });
+    img.addEventListener('load', function () {
+      img.classList.add('ready');
+      var ghost = tile.querySelector('.lk-old');
+      if (ghost) { ghost.classList.add('go'); setTimeout(function () { ghost.remove(); }, 250); }
+    });
+    /* Once the picker is near, fetch the screen's twenty looks, so most taps swap at once. */
+    var near = false, fetched = {};
+    function preload() {
+      ['light', 'dark'].forEach(function (th) {
+        LOOK_PAL.map(function (p) { return p[0]; }).concat(['label']).forEach(function (name) {
+          var base = 'media/' + cp.id + '/' + width + '/looks/' + look.screen + '/' + th + '-' + name;
+          if (fetched[base]) return;
+          var im = new Image();
+          if (width === 'desktop') { im.srcset = base + '.webp 1280w, ' + base + '-2x.webp 2560w'; im.sizes = 'min(980px, 100vw)'; }
+          im.src = base + '.webp';
+          fetched[base] = im;
+        });
+      });
+    }
     var groups = [];
     function seg(label, key, pairs) {
       var g = el('div', { class: 'seg', role: 'group', 'aria-label': label });
@@ -970,7 +1000,9 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
       var k = lookIndex();
       var key = (dark ? 'dark' : 'light') + '-' + (look.style === 'label' ? 'label' : LOOK_PAL[Math.floor(k / 2)][0]);
       var base = 'media/' + cp.id + '/' + width + '/looks/' + look.screen + '/' + key;
+      if (near) preload();
       if (img.getAttribute('src') !== base + '.webp') {
+        if (img.getAttribute('src') && !tile.querySelector('.lk-old')) { var ghost = img.cloneNode(); ghost.className = 'lk-old'; ghost.alt = ''; tile.appendChild(ghost); }
         img.classList.remove('ready');
         if (width === 'desktop') { img.srcset = base + '.webp 1280w, ' + base + '-2x.webp 2560w'; img.sizes = 'min(980px, 100vw)'; }
         img.src = base + '.webp';
@@ -993,6 +1025,10 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     box.appendChild(scroll);
     box.appendChild(cap);
     draw();
+    if ('IntersectionObserver' in window) {
+      var lo = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { lo.disconnect(); near = true; preload(); } }, { rootMargin: '800px 0px' });
+      lo.observe(box);
+    }
     return box;
   }
 
@@ -1095,18 +1131,67 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     stage.scrollTop = 0;
   }
   function setCut(v) { var i = stage.querySelector('.inner'); if (i) i.style.setProperty('--cut', v + '%'); }
-  cut.addEventListener('input', function () { setCut(cut.value); });
+  cut.addEventListener('input', function () { cancelAnimationFrame(sweepRaf); setCut(cut.value); });
   function drag(e) {
     var r = stage.getBoundingClientRect();
     var x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
     cut.value = Math.round(x); setCut(x);
   }
   var down = false;
-  stage.addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse' && e.offsetX > stage.clientWidth) return; down = true; drag(e); });
+  stage.addEventListener('pointerdown', function (e) { cancelAnimationFrame(sweepRaf); if (e.pointerType === 'mouse' && e.offsetX > stage.clientWidth) return; down = true; drag(e); });
   window.addEventListener('pointermove', function (e) { if (down) drag(e); });
   window.addEventListener('pointerup', function () { down = false; });
   window.addEventListener('pointercancel', function () { down = false; });
-  [selA, selB, selP].forEach(function (s) { s.addEventListener('change', renderCompare); });
+  [selA, selB, selP].forEach(function (s) { s.addEventListener('change', function () { renderCompare(); sweep(); }); });
+  /* A new pair shows at once, then the divider sweeps from the right edge to the middle once both pages are in.
+     If they take more than a second, it just lands in the middle, so nobody waits for the animation. */
+  var sweepRaf = 0;
+  function sweep() {
+    cancelAnimationFrame(sweepRaf);
+    if (!stage.querySelector('.inner')) return;
+    setCut(100); cut.value = 100;
+    var imgs = Array.prototype.slice.call(stage.querySelectorAll('img'));
+    var loaded = function () { return imgs.every(function (i) { return i.complete && i.naturalWidth; }); };
+    Promise.race([
+      Promise.all(imgs.map(function (i) { return i.decode().catch(function () {}); })),
+      new Promise(function (r) { setTimeout(r, 1000); })
+    ]).then(function () {
+      if (!loaded()) { setCut(50); cut.value = 50; return; }
+      var t0 = 0;
+      function step(t) {
+        if (!t0) t0 = t;
+        var k = Math.min(1, (t - t0) / 950), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2, v = 100 - 50 * e;
+        setCut(v); cut.value = Math.round(v);
+        if (k < 1) sweepRaf = requestAnimationFrame(step);
+      }
+      sweepRaf = requestAnimationFrame(step);
+    });
+  }
+
+  /* Phone / Desktop. The button changes at once, and the next frame is captured: every frame on screen
+     (the strips, the comparison, the look) then grows or shrinks to its new size. Nothing waits for images.
+     The switch stays where it was on screen, because what is above it changes height. */
+  function frameList() {
+    var list = [];
+    document.querySelectorAll('#cps .cp').forEach(function (c) { var s = c.querySelector('.strip'); if (s) list.push(['strip-' + c.id, s]); });
+    list.push(['cmp-body', cmpBody]);
+    var lk = document.querySelector('.lk-scroll');
+    if (lk) list.push(['look-frame', lk]);
+    return list;
+  }
+  function swapWidth(apply) {
+    var top0 = seg.getBoundingClientRect().top;
+    var run = function () { apply(); window.scrollTo({ top: window.scrollY + seg.getBoundingClientRect().top - top0, behavior: 'instant' }); };
+    if (!document.startViewTransition) { run(); return; }
+    var named = frameList().filter(function (f) { var r = f[1].getBoundingClientRect(); return r.bottom > 80 && r.top < window.innerHeight - 80; })
+      .map(function (f) { f[1].style.viewTransitionName = f[0]; return f[0]; });
+    var t = document.startViewTransition(function () {
+      run();
+      frameList().forEach(function (f) { if (named.indexOf(f[0]) !== -1) f[1].style.viewTransitionName = f[0]; });
+    });
+    var clear = function () { frameList().forEach(function (f) { f[1].style.viewTransitionName = ''; }); };
+    t.finished.then(clear, clear);
+  }
 
   /* the design board stills */
   var boards = Array.prototype.map.call(document.querySelectorAll('#dirStrip [data-shot]'), function (b) {
