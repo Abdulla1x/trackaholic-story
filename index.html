@@ -331,6 +331,14 @@ dialog #dlgcap { min-width: 0; overflow-wrap: anywhere; }
   html[data-mode="lively"] #cps .cp.rail-armed:not(.shown) .when > * { opacity: 0; transform: scale(1.3); }
   html[data-mode="lively"] #cps .cp.rail-armed:not(.shown) .body > * { opacity: 0; transform: translateX(-16px); }
   html[data-mode="lively"] #cps .cp.rail-armed:not(.shown) .strip .shot { opacity: 0; transform: translateX(28px); }
+  /* the wordmark's gauge fills a segment at a time on load; once the chapter bar sticks, a copy of it drops into the bar */
+  html[data-mode="lively"] .mast .gauge.fill i:not(.off):not(.p) { animation: segfill .3s ease both; animation-delay: calc(var(--i) * 80ms + 250ms); transform-origin: bottom; }
+  html[data-mode="lively"] .mast .gauge.fill i.p { animation: segpop .45s cubic-bezier(.2,1.6,.4,1) both; animation-delay: 1.05s; transform-origin: bottom; }
+  @keyframes segfill { from { background-color: var(--track); transform: scaleY(.35); } to { background-color: var(--ink); transform: none; } }
+  @keyframes segpop { from { transform: scaleY(0); } }
+  html[data-mode="lively"] .pgauge.wait { visibility: hidden; }
+  .gauge.flying { pointer-events: none; }
+  .gauge.flying i { transition: background-color .45s ease; }
   @keyframes appear { to { opacity: 1; } }
   @keyframes write { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
 /* recruiter layer: the 30-second box, under the hood, about me */
@@ -1279,6 +1287,7 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     if (max - y < 4 && chapters.length) cur = chapters[chapters.length - 1].id;
     if (cur !== curId) { curId = cur; setCurrent(cur); }
     rail();
+    gaugeDrop();
   }
   /* The line reaches a checkpoint when the checkpoint's top passes 62% of the way down the screen. */
   function rail() {
@@ -1376,7 +1385,39 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     });
     rail();
   }
+  /* The masthead gauge hands over to the chapter bar: a copy flies from where the gauge is into the bar,
+     taking on the reading progress as it goes, and the bar's own gauge appears where it lands. */
+  var mgauge = document.querySelector('.mast .gauge'), pgauge = document.getElementById('pgauge'), chapBar = document.querySelector('.chap');
+  var handed = false, flying = null;
+  Array.prototype.forEach.call(mgauge.children, function (s, i) { s.style.setProperty('--i', i); });
+  function underBar() { return chapBar.getBoundingClientRect().top <= 1 && window.scrollY > 10; }
+  function gaugeDrop() {
+    if (!mgauge) return;
+    var under = underBar();
+    if (under && !handed) { handed = true; fly(); }
+    else if (!under && handed) { handed = false; if (flying) { flying.remove(); flying = null; } pgauge.classList.add('wait'); }
+  }
+  function fly() {
+    var a = mgauge.getBoundingClientRect(), b = pgauge.getBoundingClientRect(), top = Math.max(a.top, -40);
+    var c = mgauge.cloneNode(true);
+    c.classList.remove('fill'); c.classList.add('flying');
+    c.style.cssText = 'position:fixed;margin:0;z-index:40;left:' + a.left + 'px;top:' + top + 'px;width:' + a.width + 'px;height:' + a.height + 'px';
+    document.body.appendChild(c); flying = c;
+    requestAnimationFrame(function () {
+      Array.prototype.forEach.call(c.children, function (s, k) { if (k < segs.length) s.className = segs[k].classList.contains('on') ? '' : 'off'; });
+    });
+    if (!c.animate) { c.remove(); flying = null; pgauge.classList.remove('wait'); return; }
+    c.animate([
+      { left: a.left + 'px', top: top + 'px', width: a.width + 'px', height: a.height + 'px', gap: '3px' },
+      { left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px', gap: '2px' }
+    ], { duration: 600, easing: 'cubic-bezier(.2,.8,.2,1)' }).onfinish = function () {
+      if (flying === c) { c.remove(); flying = null; pgauge.classList.remove('wait'); }
+    };
+  }
   root.setAttribute('data-mode', 'lively');
+  handed = underBar();
+  pgauge.classList.toggle('wait', !handed);
+  mgauge.classList.add('fill');
   arm();
   onScroll();
 })();
