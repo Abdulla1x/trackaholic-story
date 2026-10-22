@@ -169,7 +169,9 @@ select { font: inherit; color: var(--ink); background: var(--field); border: 1.5
 .cmp-body { display: grid; gap: 8px; justify-self: center; width: 100%; max-width: var(--stage-max, 380px); }
 .cmp-tags { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 .cmp-tags span { background: var(--ink); color: var(--ground); padding: 2px 7px; border-radius: 3px; }
-.stage { position: relative; width: 100%; max-height: min(80vh, 900px); overflow-y: auto; overflow-x: hidden; background: var(--field); border: 1px solid var(--rule);
+/* A fixed height, not a max: while a new pair of pages loads, the frame would otherwise collapse
+   to nothing and pull the rest of the page up with it. */
+.stage { position: relative; width: 100%; height: min(80vh, 900px); overflow-y: auto; overflow-x: hidden; background: var(--field); border: 1px solid var(--rule);
   user-select: none; touch-action: pan-y; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .stage .inner { position: relative; display: grid; }
 .stage .layer { grid-area: 1 / 1; min-width: 0; }
