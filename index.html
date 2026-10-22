@@ -130,6 +130,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* commit chart */
 .chart { display: grid; gap: 10px; }
+.runtot { font-size: 14px; color: var(--ink-2); }
+.runtot b { font-size: 28px; font-weight: 780; font-stretch: 78%; color: var(--ink); margin-right: 4px; }
 .chart-scroll { overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .chart-grid { min-width: 620px; display: grid; grid-template-columns: repeat(28, minmax(0, 1fr)); column-gap: 2px; }
 .col { position: relative; display: grid; grid-template-rows: 18px 200px; align-items: end; justify-items: center; border-bottom: 1px solid var(--ink-2); }
@@ -285,7 +287,11 @@ dialog #dlgcap { min-width: 0; overflow-wrap: anywhere; }
   html[data-mode="lively"] .rv.armed { opacity: 0; transform: translateY(18px); }
   html[data-mode="lively"] .pgauge i { transition: background-color .25s ease; }
   html[data-mode="lively"] .chart.armed .bar { transform: scaleY(0); }
-  html[data-mode="lively"] .chart .bar { transform-origin: bottom; transition: transform .7s cubic-bezier(.2,.8,.2,1); transition-delay: calc(var(--i, 0) * 22ms); }
+  html[data-mode="lively"] .chart .bar { transform-origin: bottom; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+  html[data-mode="lively"] .chart .val, html[data-mode="lively"] .chart .eras span { transition: opacity .35s ease, transform .35s ease; }
+  html[data-mode="lively"] .chart.armed .val, html[data-mode="lively"] .chart.armed .eras span, .chart .val.off, .chart .eras span.off { opacity: 0; }
+  .chart .eras span.off { transform: translateY(4px); }
+  .snap, .snap * { transition: none !important; }
   html[data-mode="lively"] .term.armed .tl, html[data-mode="lively"] .pad.armed .pad-page > div { opacity: 0; }
   html[data-mode="lively"] .term.play .tl { opacity: 0; animation: appear .01s steps(1) forwards; animation-delay: calc(var(--i) * 55ms); }
   html[data-mode="lively"] .pad.play .pad-page > div { opacity: 0; animation: write .35s ease forwards; animation-delay: calc(var(--i) * 260ms + 150ms); }
@@ -413,6 +419,7 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
   <section class="sec chart" id="commits" aria-labelledby="chart-title">
     <div class="sec-head"><h2 id="chart-title">Two years in commits</h2><span class="lbl">Commits per month, Jul 2024 to Oct 2026</span></div>
     <p class="quip">Most of these bars are tiny. Then summer happened.</p>
+    <p class="runtot num" id="runtot" aria-hidden="true"><b>751</b><span>commits by Oct 2026</span></p>
     <div class="chart-scroll">
       <div class="chart-grid" id="chartGrid"></div>
       <div class="ticks" id="chartTicks" aria-hidden="true"></div>
@@ -782,7 +789,6 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     COMMITS.forEach(function (c, idx) {
       var n = c[1], pct = n / max * 100;
       var bar = el('span', { class: 'bar' + (n ? '' : ' zero') });
-      bar.style.setProperty('--i', idx);
       bar.style.height = n ? 'max(2px, ' + pct.toFixed(2) + '%)' : '0';
       var col = el('div', { class: 'col' }, [
         el('span', { class: 'val', text: n ? String(n) : '' }), bar,
@@ -1190,7 +1196,34 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     }
     requestAnimationFrame(step);
   }
+  /* The commit chart fills in a month at a time, left to right, with the running total above it
+     and each era's band appearing as the sweep reaches it. */
+  var chartSec = document.getElementById('commits'), runtot = document.getElementById('runtot'), chartTimer = 0;
+  function setTot(n, i) {
+    runtot.firstChild.textContent = String(n);
+    runtot.lastChild.textContent = (n === 1 ? ' commit' : ' commits') + ' by ' + monthName(COMMITS[i][0]);
+  }
+  function chartRun() {
+    var bars = chartSec.querySelectorAll('.bar'), vals = chartSec.querySelectorAll('.val');
+    var eras = Array.prototype.map.call(chartSec.querySelectorAll('.eras span'), function (s) { return [s, parseInt(s.style.gridColumn, 10) - 1]; });
+    clearInterval(chartTimer);
+    chartSec.classList.add('snap');
+    Array.prototype.forEach.call(bars, function (b) { b.style.transform = 'scaleY(0)'; });
+    Array.prototype.forEach.call(vals, function (v) { v.classList.add('off'); });
+    eras.forEach(function (e) { e[0].classList.add('off'); });
+    chartSec.classList.remove('armed'); void chartSec.offsetWidth; chartSec.classList.remove('snap');
+    var i = 0, tot = 0;
+    chartTimer = setInterval(function () {
+      tot += COMMITS[i][1];
+      bars[i].style.transform = '';
+      vals[i].classList.remove('off');
+      eras.forEach(function (e) { if (e[1] <= i) e[0].classList.remove('off'); });
+      setTot(tot, i);
+      if (++i >= COMMITS.length) clearInterval(chartTimer);
+    }, 75);
+  }
   function play(t) {
+    if (t === chartSec) { chartRun(); return; }
     t.classList.remove('armed');
     if (t.matches('.term, .pad')) t.classList.add('play');
     if (t.dataset.count) countUp(t);
@@ -1202,7 +1235,7 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
       if (!x.dataset.seen && below(x)) { x.dataset.seen = '1'; x.classList.add('armed'); io.observe(x); }
     });
     document.querySelectorAll('.term, .pad, section.chart').forEach(function (x) {
-      if (!x.classList.contains('play') && !x.dataset.seen && below(x)) { x.dataset.seen = '1'; x.classList.add('armed'); io.observe(x); }
+      if (!x.classList.contains('play') && !x.dataset.seen && below(x)) { x.dataset.seen = '1'; x.classList.add('armed'); io.observe(x); if (x === chartSec) setTot(0, 0); }
     });
     document.querySelectorAll('[data-count]').forEach(function (n) {
       if (!n.dataset.done && below(n)) { n.textContent = '0'; io.observe(n); }
