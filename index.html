@@ -1,0 +1,1197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trackaholic, then and now</title>
+<style>
+/* Page frame: the safe areas on phones with a notch, and the hidden rule. */
+:root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; padding: 0; }
+img { max-width: 100%; }
+[hidden]:not([hidden=until-found i]) { display: none !important; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Libre+Franklin:wght@400;800;900&family=Mona+Sans:wdth,wght@75..125,400..900&display=swap">
+<style>
+/* Layout: the app's own "data page" look. A story told down one column of dated
+   rows: the notepad, the terminal, the commit record, then every screen, then
+   the planning cycles and what comes next. */
+:root {
+  --ground: #e4e7e1; --field: #eef0eb; --ink: #0f1210; --ink-2: #485049;
+  --rule: #c3c9c1; --track: #cfd4cc; --action: #1747e0; --action-ink: #ffffff; --plan: #8c1d8c;
+  --paper: #fbf8ec; --paper-ink: #233a8a; --paper-rule: #b9cde6; --paper-margin: #e59a9a;
+  --term-bg: #111512; --term-ink: #d6dfd5; --term-dim: #8a958b; --term-in: #9cc8ff; --term-edge: #2a312b;
+  --font: "Mona Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --label-font: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
+  --hand: "Kalam", "Segoe Print", "Bradley Hand", cursive;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0b0e0c; --field: #141815; --ink: #e7ebe4; --ink-2: #9ba49c;
+    --rule: #283029; --track: #232924; --action: #7d9bff; --action-ink: #0b0e0c; --plan: #e88ae8;
+    --paper: #d9d5c6; --paper-ink: #1f3478; --paper-rule: #a3b5cc; --paper-margin: #c47f7f;
+    --term-bg: #050706; --term-edge: #283029;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0b0e0c; --field: #141815; --ink: #e7ebe4; --ink-2: #9ba49c;
+  --rule: #283029; --track: #232924; --action: #7d9bff; --action-ink: #0b0e0c; --plan: #e88ae8;
+  --paper: #d9d5c6; --paper-ink: #1f3478; --paper-rule: #a3b5cc; --paper-margin: #c47f7f;
+  --term-bg: #050706; --term-edge: #283029;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font: 15px/1.5 var(--font); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px; display: grid; gap: 44px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.lbl { font-size: 11px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); font-stretch: 110%; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+.sec { display: grid; gap: 16px; }
+.sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: end; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.sec-head h2 { font-size: 16px; font-weight: 750; font-stretch: 112%; }
+.prose { display: grid; gap: 12px; max-width: 66ch; }
+.prose p { color: var(--ink); }
+.prose .quiet { color: var(--ink-2); }
+
+/* masthead: the wordmark idea, label face over a gauge rule */
+.mast { display: grid; gap: 14px; }
+.mark { display: inline-grid; justify-self: start; font-family: var(--label-font); }
+.mark h1 { font-weight: 900; font-size: clamp(38px, 8vw, 64px); letter-spacing: -0.035em; line-height: .95; }
+.gauge { display: grid; grid-template-columns: repeat(12, 1fr) 3px; gap: 3px; height: 9px; margin: 8px 0 4px; }
+.gauge i { background: var(--ink); } .gauge i.off { background: var(--track); } .gauge i.p { background: var(--plan); }
+.serving { display: flex; justify-content: space-between; border-top: 1px solid var(--ink); padding-top: 3px; font-size: 13px; }
+.serving b { font-weight: 800; }
+.lede { max-width: 64ch; color: var(--ink-2); font-size: 16px; }
+
+.fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.fields .f { padding: 12px 16px 14px 0; display: grid; gap: 3px; min-width: 0; }
+.fields .f + .f { border-left: 1px solid var(--rule); padding-left: 16px; }
+.fields .v { font-size: 30px; font-weight: 780; font-stretch: 78%; line-height: 1; }
+.fields .v small { font-size: 14px; font-weight: 600; font-stretch: 100%; color: var(--ink-2); margin-left: 3px; }
+@media (max-width: 720px) { .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fields .f:nth-child(3) { border-left: 0; padding-left: 0; } .fields .f:nth-child(n+3) { border-top: 1px solid var(--rule); } }
+
+/* origin: prose beside a notepad page and the first script */
+.origin { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px 40px; align-items: start; }
+@media (max-width: 860px) { .origin { grid-template-columns: minmax(0, 1fr); } }
+.origin-art { display: grid; gap: 18px; min-width: 0; }
+.pad { margin: 0; display: grid; gap: 6px; }
+.pad-page { position: relative; background-color: var(--paper); color: var(--paper-ink); font-family: var(--hand); font-size: 17px; line-height: 30px;
+  padding: 34px 18px 18px 58px; border-radius: 2px; transform: rotate(-0.6deg);
+  background-image: linear-gradient(90deg, transparent 44px, var(--paper-margin) 44px, var(--paper-margin) 45.5px, transparent 45.5px),
+                    repeating-linear-gradient(180deg, transparent 0 29px, var(--paper-rule) 29px 30px);
+  background-position: 0 0, 0 4px; box-shadow: 0 1px 0 var(--rule), 0 8px 20px -14px rgba(0,0,0,.45); }
+.pad-page .holes { position: absolute; left: 14px; top: 26px; bottom: 20px; display: grid; align-content: space-between; }
+.pad-page .holes i { width: 12px; height: 12px; border-radius: 50%; background: var(--ground); display: block; }
+.pad-page .day { font-weight: 700; }
+.pad-page .ln { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pad-page .sum { color: var(--ink-2); }
+.pad-page .tot { font-weight: 700; border-top: 1.5px solid var(--paper-ink); margin-top: 2px; }
+.pad figcaption, .code figcaption, .term figcaption { font-size: 13px; color: var(--ink-2); }
+.stat { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.stat .v { font-size: 40px; font-weight: 780; font-stretch: 78%; line-height: 1; grid-row: span 2; }
+.stat .t { font-weight: 650; }
+.stat .s { color: var(--ink-2); font-size: 14px; }
+
+/* terminal blocks: the CLI as it actually printed */
+.code, .term { margin: 0; display: grid; gap: 6px; min-width: 0; }
+.term pre, .code pre { margin: 0; background: var(--term-bg); color: var(--term-ink); border: 1px solid var(--term-edge); border-radius: 6px;
+  padding: 12px 14px; font: 12.5px/1.55 var(--mono); overflow-x: auto; white-space: pre; tab-size: 4; }
+.term pre .in { color: var(--term-in); font-weight: 700; }
+.term pre .dim, .code pre .dim { color: var(--term-dim); }
+.term pre::before { content: "$ python \"macros calculator.py\""; display: block; color: var(--term-dim); margin-bottom: 4px; }
+.terms { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; align-items: start; }
+
+/* commit chart */
+.chart { display: grid; gap: 10px; }
+.chart-scroll { overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.chart-grid { min-width: 620px; display: grid; grid-template-columns: repeat(28, minmax(0, 1fr)); column-gap: 2px; }
+.col { position: relative; display: grid; grid-template-rows: 18px 200px; align-items: end; justify-items: center; border-bottom: 1px solid var(--ink-2); }
+.col .val { font-size: 11px; font-weight: 650; color: var(--ink); align-self: end; padding-bottom: 2px; font-variant-numeric: tabular-nums; }
+.col .bar { width: min(100%, 22px); background: var(--action); border-radius: 4px 4px 0 0; min-height: 0; }
+.col .bar.zero { background: transparent; }
+.col .hit { position: absolute; inset: 0; background: transparent; border: 0; padding: 0; }
+.col .hit:hover + .tip, .col .hit:focus-visible + .tip { display: block; }
+.col .tip { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); z-index: 2; white-space: nowrap; background: var(--ink); color: var(--ground); font-size: 12px; padding: 4px 8px; border-radius: 4px; pointer-events: none; }
+.ticks, .eras { display: grid; grid-template-columns: repeat(28, minmax(0, 1fr)); column-gap: 2px; min-width: 620px; }
+.ticks span { font-size: 11px; color: var(--ink-2); padding-top: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.eras { margin-top: 8px; row-gap: 4px; }
+.eras span { border-top: 2px solid var(--ink-2); padding-top: 3px; font-size: 12px; font-weight: 650; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eras span.live { border-top-color: var(--action); color: var(--ink); }
+/* a chapter inside an era, on its own row */
+.eras span.sub { grid-row: 2; }
+/* the last bands sit at the right edge: on narrow charts their words spill left into the empty months rather than clipping */
+@media (max-width: 900px) { .eras span.spill { overflow: visible; direction: rtl; } }
+.chart-note { font-size: 13px; color: var(--ink-2); max-width: 72ch; }
+.chart details { font-size: 13px; color: var(--ink-2); }
+.chart details summary { cursor: pointer; width: max-content; }
+.chart table { border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.chart td, .chart th { padding: 3px 14px 3px 0; text-align: left; border-bottom: 1px solid var(--rule); }
+
+/* controls */
+.bar-ctl { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.seg { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.seg button { min-height: 36px; padding: 0 12px; border: 1.5px solid var(--rule); border-radius: 5px; background: transparent; font-weight: 600; font-size: 13.5px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+select { font: inherit; color: var(--ink); background: var(--field); border: 1.5px solid var(--rule); border-radius: 5px; min-height: 38px; padding: 0 10px; max-width: 100%; }
+.seglbl { font-size: 13px; color: var(--ink-2); }
+
+/* comparison: two full pages stacked in one scroll frame */
+.cmp { display: grid; gap: 12px; }
+.pickers { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pickers label { display: grid; gap: 3px; }
+.cmp-body { display: grid; gap: 8px; justify-self: center; width: 100%; max-width: var(--stage-max, 380px); }
+.cmp-tags { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.cmp-tags span { background: var(--ink); color: var(--ground); padding: 2px 7px; border-radius: 3px; }
+.stage { position: relative; width: 100%; max-height: min(80vh, 900px); overflow-y: auto; overflow-x: hidden; background: var(--field); border: 1px solid var(--rule);
+  user-select: none; touch-action: pan-y; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.stage .inner { position: relative; display: grid; }
+.stage .layer { grid-area: 1 / 1; min-width: 0; }
+.stage img { width: 100%; height: auto; display: block; }
+.stage .after { clip-path: inset(0 0 0 var(--cut, 50%)); }
+.stage .handle { position: absolute; top: 0; bottom: 0; left: var(--cut, 50%); width: 2px; background: var(--plan); transform: translateX(-1px); pointer-events: none; }
+.stage .missing { padding: 60px 20px; text-align: center; color: var(--ink-2); font-size: 14px; }
+.range { width: 100%; accent-color: var(--plan); }
+.cmp-hint { font-size: 13px; color: var(--ink-2); text-align: center; }
+
+/* checkpoints */
+.cp { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 24px; padding: 18px 0 22px; border-bottom: 1px solid var(--rule); }
+.cp .when { display: grid; gap: 2px; align-content: start; }
+.cp .date { font-size: 20px; font-weight: 760; font-stretch: 80%; }
+.cp .body { display: grid; gap: 10px; min-width: 0; }
+.cp h3 { font-size: 17px; font-weight: 750; }
+.cp .note { color: var(--ink-2); max-width: 70ch; }
+.cp .src { font-size: 13px; color: var(--ink-2); }
+.strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.shot { flex: none; display: grid; gap: 5px; margin: 0; }
+.shot button { position: relative; padding: 0; border: 1px solid var(--rule); background: var(--field); display: block; height: var(--h, 300px); aspect-ratio: var(--ar, 390 / 844); overflow: hidden; }
+.shot button img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; max-width: none; }
+.shot button .fp { position: absolute; left: 6px; bottom: 6px; background: var(--ink); color: var(--ground); font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+.shot video { display: block; height: var(--h, 300px); width: auto; max-width: none; background: var(--field); border: 1px solid var(--rule); }
+.shot figcaption { font-size: 13px; color: var(--ink-2); }
+.wide .shot { --h: 230px; }
+.cp.soon .date { color: var(--ink-2); }
+.cp.soon h3 { color: var(--ink-2); font-weight: 650; }
+
+/* try a look (3b on): one capture per look, scrollable */
+.looks { display: grid; gap: 10px; border-top: 1px solid var(--rule); padding-top: 14px; min-width: 0; }
+.looks h4 { font-size: 15px; font-weight: 750; }
+.looks .lk-intro { font-size: 14px; color: var(--ink-2); max-width: 70ch; }
+.lk-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.lk-sw { display: flex; flex-wrap: wrap; gap: 5px; }
+.lk-sw button { width: 32px; height: 32px; padding: 3px; border: 1.5px solid var(--rule); border-radius: 6px; background: transparent; display: grid; }
+.lk-sw button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.lk-sw button:disabled { opacity: .35; cursor: default; }
+.lk-sw button span { display: grid; grid-template-rows: 1fr 6px; border-radius: 3px; overflow: hidden; border: 1px solid rgba(0,0,0,.18); }
+.lk-sw button span i { display: block; }
+.lk-scroll { width: 100%; max-height: 600px; overflow-y: auto; border: 1px solid var(--rule); background: var(--field); scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.lk-scroll.phone { width: min(100%, 330px); }
+.lk-tile { position: relative; overflow: hidden; }
+.lk-tile img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.lk-tile img:not(.ready) { opacity: .4; }
+.lk-tile .lk-wait { position: absolute; inset: 0; display: grid; place-items: start center; padding-top: 80px; color: var(--ink-2); font-size: 14px; }
+.lk-tile img.ready + .lk-wait { display: none; }
+.lk-cap { font-size: 13px; color: var(--ink-2); }
+@media (max-width: 640px) { .cp { grid-template-columns: minmax(0, 1fr); } .shot { --h: 260px; } .wide .shot { --h: 170px; } }
+
+/* planning cycles */
+.cycles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 28px 28px; }
+.cyc { display: grid; gap: 10px; align-content: start; border-top: 2px solid var(--ink); padding-top: 12px; min-width: 0; }
+.cyc .k { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cyc h3 { font-size: 17px; font-weight: 750; }
+.cyc ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.cyc li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 8px; font-size: 14px; }
+.cyc li b { font: 650 12px/1.9 var(--mono); color: var(--ink-2); }
+.cyc li.parked { color: var(--ink-2); }
+.cyc .learned { font-size: 14px; color: var(--ink); border-left: 2px solid var(--plan); padding-left: 10px; }
+
+/* redesign entries */
+.h-row { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.pend { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--plan); border: 1.5px dashed var(--plan); border-radius: 4px; padding: 1px 7px; }
+#dirStrip .shot button { --ar: 360 / 701; }
+.tries { margin: 0; padding-left: 22px; display: grid; gap: 4px; color: var(--ink-2); max-width: 70ch; }
+.tries li::marker { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 650; }
+.learned a, .foot a { color: var(--action); }
+
+/* where it's going */
+.ahead { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px 28px; }
+.ahead div { display: grid; gap: 4px; align-content: start; border-top: 1px solid var(--rule); padding-top: 10px; }
+.ahead h3 { font-size: 15px; font-weight: 750; }
+.ahead p { color: var(--ink-2); font-size: 14px; }
+.close { font-size: 18px; font-weight: 650; max-width: 52ch; text-wrap: balance; }
+
+dialog { border: 0; padding: 0; background: var(--ground); color: var(--ink); max-width: min(96vw, 1320px); max-height: 94vh; }
+dialog::backdrop { background: rgba(0, 0, 0, .6); }
+dialog .dlg { display: grid; gap: 8px; padding: 12px; }
+dialog .dlg-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+dialog .dlg-scroll { max-height: calc(94vh - 72px); overflow: auto; }
+dialog img { display: block; width: var(--natw, 390px); max-width: 100%; height: auto; margin: 0 auto; }
+dialog .x { min-height: 36px; padding: 0 12px; border: 1.5px solid var(--rule); border-radius: 5px; background: transparent; font-weight: 600; }
+dialog .dlg-nav { display: flex; align-items: center; gap: 6px; flex: none; }
+dialog #dlgprev, dialog #dlgnext { min-width: 40px; font-size: 18px; line-height: 1; }
+dialog #dlgprev:disabled, dialog #dlgnext:disabled { opacity: .35; cursor: default; }
+dialog #dlgpos { font-size: 13px; color: var(--ink-2); min-width: 44px; text-align: center; }
+dialog #dlgcap { min-width: 0; overflow-wrap: anywhere; }
+.foot { color: var(--ink-2); font-size: 13px; max-width: 72ch; display: grid; gap: 6px; }
+
+/* chapter bar: chips, and the wordmark gauge as reading progress */
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+.sec, .cp, .cyc { scroll-margin-top: 90px; }
+.chap { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; margin-inline: -16px; padding: 8px 16px 0; background: var(--ground);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; align-items: center; border-bottom: 1px solid var(--rule); }
+.chips { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.chips::-webkit-scrollbar { display: none; }
+.chips a { flex: none; display: inline-flex; align-items: center; min-height: 36px; padding: 0 11px; border-radius: 5px; color: var(--ink-2); text-decoration: none; font-weight: 650; font-size: 13.5px; font-stretch: 105%; }
+.chips a:hover { color: var(--ink); background: var(--field); }
+.chips a[aria-current="true"] { background: var(--ink); color: var(--ground); }
+.pgauge { display: grid; grid-template-columns: repeat(12, 1fr) 3px; gap: 2px; height: 4px; margin: 0 -16px; }
+.pgauge i { background: var(--track); } .pgauge i.on { background: var(--ink); } .pgauge i.p { background: var(--plan); }
+.quip { font-family: var(--hand); font-size: 17px; line-height: 1.3; color: var(--ink-2); transform: rotate(-0.4deg); transform-origin: left; max-width: 60ch; }
+.years { display: inline-flex; gap: 4px; align-items: center; }
+.years a { min-height: 32px; display: inline-flex; align-items: center; padding: 0 10px; border: 1.5px solid var(--rule); border-radius: 5px; color: var(--ink); text-decoration: none; font-weight: 650; font-size: 13px; font-variant-numeric: tabular-nums; }
+.years a:hover { border-color: var(--ink); }
+.totop { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 15; min-height: 44px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--ink); color: var(--ground); font-weight: 700; font-size: 13.5px; box-shadow: 0 6px 18px -8px rgba(0,0,0,.5); }
+
+/* Lively motion (the only mode, owner's choice): everything starts visible, only what is below the screen waits */
+  html[data-mode="lively"] .rv { transition: opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
+  html[data-mode="lively"] .rv.armed { opacity: 0; transform: translateY(18px); }
+  html[data-mode="lively"] .pgauge i { transition: background-color .25s ease; }
+  html[data-mode="lively"] .chart.armed .bar { transform: scaleY(0); }
+  html[data-mode="lively"] .chart .bar { transform-origin: bottom; transition: transform .7s cubic-bezier(.2,.8,.2,1); transition-delay: calc(var(--i, 0) * 22ms); }
+  html[data-mode="lively"] .term.armed .tl, html[data-mode="lively"] .pad.armed .pad-page > div { opacity: 0; }
+  html[data-mode="lively"] .term.play .tl { opacity: 0; animation: appear .01s steps(1) forwards; animation-delay: calc(var(--i) * 55ms); }
+  html[data-mode="lively"] .pad.play .pad-page > div { opacity: 0; animation: write .35s ease forwards; animation-delay: calc(var(--i) * 260ms + 150ms); }
+  @keyframes appear { to { opacity: 1; } }
+  @keyframes write { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+/* recruiter layer: the 30-second box, under the hood, about me */
+.tldr { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px 32px; align-items: center; background: var(--field); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+@media (max-width: 760px) { .tldr { grid-template-columns: minmax(0, 1fr); } }
+.tldr-text { display: grid; gap: 6px; min-width: 0; }
+.tldr-text h2 { margin: 0; }
+.tldr-text p { max-width: 62ch; }
+.tldr-links { display: flex; flex-wrap: wrap; gap: 8px; align-content: center; }
+.btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1.5px solid var(--ink); border-radius: 5px; color: var(--ink); font-weight: 700; font-size: 14px; text-decoration: none; }
+.btn:hover { background: var(--ground); }
+.btn.pri { background: var(--action); border-color: var(--action); color: var(--action-ink); }
+.tldr-note { flex-basis: 100%; font-size: 12.5px; color: var(--ink-2); }
+.build { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px 40px; align-items: start; }
+@media (max-width: 860px) { .build { grid-template-columns: minmax(0, 1fr); } }
+.stack { display: grid; gap: 14px; }
+.sg { display: grid; gap: 6px; }
+.chipset { display: flex; flex-wrap: wrap; gap: 6px; }
+.chipset span { font-size: 13px; font-weight: 600; padding: 3px 9px; border: 1px solid var(--rule); border-radius: 4px; background: var(--field); }
+.practice { list-style: none; margin: 0; padding: 0; display: grid; }
+.practice li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 9px 0; border-top: 1px solid var(--rule); }
+.practice li:first-child { border-top: 0; padding-top: 0; }
+.practice b { font-size: 20px; font-weight: 780; font-stretch: 80%; line-height: 1.1; }
+.practice span { color: var(--ink-2); font-size: 14px; }
+.sub { font-size: 15px; font-weight: 750; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
+.note-card { display: grid; gap: 6px; align-content: start; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 6px; background: var(--field); color: var(--ink); text-decoration: none; }
+a.note-card:hover { border-color: var(--ink); }
+a.note-card b::after { content: " ↗"; color: var(--action); }
+.note-card b { font-size: 15px; }
+.note-card > span:not(.lbl):not(.pend) { color: var(--ink-2); font-size: 14px; }
+.note-card .pend { justify-self: start; }
+.about { display: grid; gap: 4px; padding-top: 16px; border-top: 2px solid var(--ink); }
+.about p { font-size: 16px; }
+.about a { color: var(--action); font-weight: 650; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="mark">
+      <h1>Trackaholic, then and now</h1>
+      <div class="gauge" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="p"></i></div>
+      <div class="serving"><span>Serving size</span><b>2 years, 1 habit</b></div>
+    </div>
+    <p class="lede">I used to track my food with a calculator and a notepad. In July 2024 I wrote nine lines of Python to do the sums for me. Two years later that script is Trackaholic, an installable app with accounts, AI meal logging and a redesign that shipped in October 2026. This page shows how it got here, one version at a time. Every app screen uses made-up demo data.</p>
+  </header>
+
+  <section class="fields" aria-label="Facts">
+    <div class="f"><span class="lbl">First line of code</span><span class="v num">2024<small>Jul 16</small></span></div>
+    <div class="f"><span class="lbl">First online</span><span class="v num">2026<small>Jul 9</small></span></div>
+    <div class="f"><span class="lbl">Commits</span><span class="v num" data-count="751">751</span></div>
+    <div class="f"><span class="lbl">Roadmap phases</span><span class="v num">0 → <span data-count="21">21</span></span></div>
+  </section>
+
+  <section class="tldr" aria-labelledby="tldr-title">
+    <div class="tldr-text">
+      <h2 id="tldr-title" class="lbl">In 30 seconds</h2>
+      <p>Trackaholic is a nutrition tracker. Describe a meal, say it out loud or snap a photo, and an AI estimate fills in the calories and macros, with weight trends, water, steps, supplements and a weekly review around it. I designed, planned and shipped it, growing it from a nine-line terminal script in 2024 into a live, installable web app with accounts and a phone layout.</p>
+    </div>
+    <div class="tldr-links">
+      <a class="btn pri" href="https://trackaholic.app" target="_blank" rel="noopener">Try the live app</a>
+      <a class="btn" href="https://github.com/Abdulla1x/Trackaholic" target="_blank" rel="noopener">Code on GitHub</a>
+      <a class="btn" href="#build">Engineering notes</a>
+      <p class="tldr-note">Free hosting, so the first load can take up to a minute, and you'll need to sign up.</p>
+    </div>
+  </section>
+
+  <nav class="chap" aria-label="Chapters">
+    <div class="chips" id="chips">
+      <a href="#origin">Start</a><a href="#commits">Commits</a><a href="#compare">Before/after</a><a href="#versions">Versions</a><a href="#summer">Summer</a><a href="#redesign">Redesign</a><a href="#build">Build</a><a href="#next">Next</a>
+    </div>
+    <div class="pgauge" id="pgauge" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="p"></i></div>
+  </nav>
+
+  <section class="sec" id="origin" aria-labelledby="origin-title">
+    <div class="sec-head"><h2 id="origin-title">How it started</h2><span class="lbl">Before 2024 → July 2024</span></div>
+    <p class="quip">Serving size: one notepad page.</p>
+    <div class="origin">
+      <div class="prose">
+        <p>Before there was any code, tracking meant a kitchen scale, a calculator and a notepad. I weighed the food, read the label, worked out weight divided by serving size times calories, and wrote the answer down. At the end of the day I added up the page.</p>
+        <p>It worked, but every meal meant the same sums again, and a notepad can't tell you anything about last week. I was learning Python, so on 16 July 2024 I wrote a script that did the one sum I kept repeating. Ten days later it could add up a meal with several ingredients and save it under a date.</p>
+        <p>I used it every day that summer. The logs from those weeks are still in the repository.</p>
+        <div class="stat">
+          <span class="v num" data-count="159">159</span>
+          <span class="t">meals logged over 28 days</span>
+          <span class="s num">15 July to 11 August 2024, through the first terminal version</span>
+        </div>
+        <p class="quiet">Every version since has been the same idea with more of what I'd learned by then: a menu, then a web page, then a real app with accounts, AI estimates and a phone layout.</p>
+      </div>
+      <div class="origin-art">
+        <figure class="pad">
+          <div class="pad-page" role="img" aria-label="Illustration of a notepad page: four foods with weights, the calories and protein worked out by hand, and a daily total of 1,098 kcal and 96 g protein.">
+            <span class="holes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            <div class="day" style="--i:0">Mon 15 July</div>
+            <div class="ln" style="--i:1"><span>Oats 80g</span><span class="sum">80/40 × 150 = 300 kcal · 10 P</span></div>
+            <div class="ln" style="--i:2"><span>Eggs ×3</span><span class="sum">3 × 78 = 234 kcal · 19 P</span></div>
+            <div class="ln" style="--i:3"><span>Chicken 200g</span><span class="sum">2 × 165 = 330 kcal · 62 P</span></div>
+            <div class="ln" style="--i:4"><span>Rice 180g</span><span class="sum">1.8 × 130 = 234 kcal · 4.9 P</span></div>
+            <div class="ln tot" style="--i:5"><span>Total</span><span>1098 kcal · 96 P</span></div>
+          </div>
+          <figcaption>Illustration of the notepad routine, not a scan of a real page.</figcaption>
+        </figure>
+        <figure class="code">
+<pre><span class="dim"># macros calculator.py, 16 July 2024, commit 8c275f4</span>
+weight = float(input("Enter the weight in grams: "))
+serving_size = float(input("Enter the serving size: "))
+calories = float(input("Enter the calories per serving: "))
+protein = float(input("Enter the amount of protein per serving: "))
+
+total_calories = weight/serving_size*calories
+total_protein = weight/serving_size*protein
+
+print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
+          <figcaption>The whole first version. The same sum as the notepad, done for me.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec chart" id="commits" aria-labelledby="chart-title">
+    <div class="sec-head"><h2 id="chart-title">Two years in commits</h2><span class="lbl">Commits per month, Jul 2024 to Oct 2026</span></div>
+    <p class="quip">Most of these bars are tiny. Then summer happened.</p>
+    <div class="chart-scroll">
+      <div class="chart-grid" id="chartGrid"></div>
+      <div class="ticks" id="chartTicks" aria-hidden="true"></div>
+      <div class="eras" aria-hidden="true">
+        <span style="grid-column: 1 / 11">Terminal script</span>
+        <span style="grid-column: 11 / 23">Streamlit</span>
+        <span class="live spill" style="grid-column: 25 / 29">React app, online</span>
+        <span class="live sub spill" style="grid-column: 27 / 29">Redesign</span>
+      </div>
+    </div>
+    <p class="chart-note">The first two years came in short bursts: a week in July 2024, a day in April 2025, then the Streamlit version through 2025. That work stayed on my laptop and was uploaded in a single commit in March 2026, so it shows up in that month's bar. The months before July 2026 were research and planning, which leave no commits. Summer 2026 is when most of the work happened: 723 of the 751 commits landed between July and October.</p>
+    <details><summary>Show the numbers as a table</summary><table id="chartTable"><thead><tr><th>Month</th><th>Commits</th></tr></thead><tbody></tbody></table></details>
+  </section>
+
+  <section class="sec cmp" id="compare" aria-labelledby="cmp-title">
+    <div class="sec-head">
+      <h2 id="cmp-title">Before and after</h2>
+      <div class="pickers">
+        <label><span class="lbl">Before</span><select id="cmpA" aria-label="Before checkpoint"></select></label>
+        <label><span class="lbl">After</span><select id="cmpB" aria-label="After checkpoint"></select></label>
+        <label><span class="lbl">Screen</span><select id="cmpPage" aria-label="Screen"></select></label>
+      </div>
+    </div>
+    <p class="quip">Drag the line. Try not to wince at July.</p>
+    <div class="cmp-body" id="cmpBody">
+      <div class="cmp-tags"><span id="tagA"></span><span id="tagB"></span></div>
+      <div class="stage" id="stage" tabindex="0" aria-label="Comparison frame, scroll to see the whole page"></div>
+      <input class="range" id="cut" type="range" min="0" max="100" value="50" aria-label="Drag to compare">
+      <p class="cmp-hint">Drag across to compare. Scroll inside the frame to see each full page.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="versions" aria-labelledby="tl-title">
+    <div class="sec-head">
+      <h2 id="tl-title">Every checkpoint</h2>
+      <div class="bar-ctl">
+        <nav class="years" aria-label="Jump to a year"><a href="#cp-2024-07">2024</a><a href="#cp-2025-04">2025</a><a href="#cp-early-2026">2026</a></nav>
+        <span class="seglbl">Show</span><div class="seg" id="width" role="group" aria-label="Screen width"></div>
+      </div>
+    </div>
+    <p class="quip">Eight versions, one habit.</p>
+    <div id="cps"></div>
+  </section>
+
+  <section class="sec" id="summer" aria-labelledby="cyc-title">
+    <div class="sec-head"><h2 id="cyc-title">Summer 2026, in six planning cycles</h2><span class="lbl"><span data-count="210">210</span> pull requests</span></div>
+    <p class="quip">Plan, ship, audit, repeat.</p>
+    <p class="prose quiet" style="color: var(--ink-2)">From July on I worked in planned phases. I'd write a roadmap, ship one phase at a time with its tests and a release note, then audit the whole app and plan again. Each cycle below ended in a review that shaped the next one.</p>
+    <div class="cycles">
+      <article class="cyc">
+        <div class="k"><span class="lbl num">Early 2026 – Jul 31</span><span class="lbl">Cycle 1</span></div>
+        <h3>The rebuild and going live</h3>
+        <ul>
+          <li><b>·</b><span>Researched and planned from early 2026, then rebuilt from scratch: a FastAPI backend and a React app</span></li>
+          <li><b>·</b><span>AI meal estimates from a photo or a description</span></li>
+          <li><b>·</b><span>Accounts, with every user's data kept apart and tested for it</span></li>
+          <li><b>·</b><span>Installable on a phone home screen</span></li>
+          <li><b>·</b><span>Online on 9 July, then a first audit: security fixes and CI</span></li>
+          <li><b>·</b><span>Day navigation, voice notes and weigh-ins</span></li>
+        </ul>
+        <p class="learned">Going live is where the work starts. The first audit found more than I expected, and a regional AI outage taught me to write a proper post-mortem.</p>
+      </article>
+      <article class="cyc">
+        <div class="k"><span class="lbl num">Aug 2 – Aug 21</span><span class="lbl">Roadmap 1</span></div>
+        <h3>Phases 0 to 8</h3>
+        <ul>
+          <li><b>0</b><span>Fixes, and up to four photos per estimate</span></li>
+          <li><b>1</b><span>Password reset, built then; email went live in October</span></li>
+          <li><b>2</b><span>An admin page for usage</span></li>
+          <li><b>3</b><span>Saved meals you can log again in one tap</span></li>
+          <li class="parked"><b>3b</b><span>Barcode scanning, examined and parked</span></li>
+          <li><b>4</b><span>Body profile, and goals that follow your weight</span></li>
+          <li><b>5</b><span>Daily burn measured from intake and weight change</span></li>
+          <li><b>6–8</b><span>Water, steps and supplements</span></li>
+        </ul>
+        <p class="learned">Decide what a phase will not do before starting it. Parking barcode scanning was as useful as shipping anything else.</p>
+      </article>
+      <article class="cyc">
+        <div class="k"><span class="lbl num">Aug 22 – Aug 26</span><span class="lbl">Roadmap 2</span></div>
+        <h3>An audit, then phases 9 to 14</h3>
+        <ul>
+          <li><b>·</b><span>A full audit and a fresh look at competing apps</span></li>
+          <li><b>9</b><span>Hardening, strict TypeScript and daily backups</span></li>
+          <li><b>10</b><span>A food library you can see and correct</span></li>
+          <li><b>11</b><span>Calorie banking across days</span></li>
+          <li><b>12</b><span>How far you move the AI's numbers</span></li>
+          <li><b>13</b><span>Share a meal as a code</span></li>
+          <li><b>14</b><span>Portfolio polish</span></li>
+        </ul>
+        <p class="learned">Other apps move fast. A feature is only an edge until someone else ships it, so the plan has to be checked against the market, not only my own list.</p>
+      </article>
+      <article class="cyc">
+        <div class="k"><span class="lbl num">Aug 26 – Aug 29</span><span class="lbl">Roadmap 2, amended</span></div>
+        <h3>Phases 15 to 21, and the README</h3>
+        <ul>
+          <li><b>15</b><span>A phone tab bar, design tokens and accessibility</span></li>
+          <li><b>16</b><span>The biggest files split up, and a test that proves nothing changed</span></li>
+          <li><b>17</b><span>Settings as five pages, and a quick-log grid</span></li>
+          <li><b>18</b><span>Shared buttons, fields and cards</span></li>
+          <li><b>19</b><span>A nudge when a weigh-in is due</span></li>
+          <li><b>20</b><span>AI estimates that use your saved foods</span></li>
+          <li><b>21</b><span>A weekly review</span></li>
+          <li><b>·</b><span>A README rewritten with fresh screenshots</span></li>
+        </ul>
+        <p class="learned">Refactor with proof. A page-by-page comparison that comes back empty is how I know a clean-up changed nothing a user can see.</p>
+      </article>
+      <article class="cyc">
+        <div class="k"><span class="lbl num">Sep 2 – Sep 28</span><span class="lbl">The queue</span></div>
+        <h3>Small things people notice</h3>
+        <ul>
+          <li><b>·</b><span>Save an ingredient from an AI estimate</span></li>
+          <li><b>·</b><span>A wake-up progress bar while the free server starts</span></li>
+          <li><b>·</b><span>Progress you can see during an AI estimate</span></li>
+          <li><b>·</b><span>An accessibility pass against WCAG AA</span></li>
+          <li><b>·</b><span>Goal weight, and chart ranges from 7 days to all time</span></li>
+          <li><b>·</b><span>Library sorting, per-100 g and duplicate finding</span></li>
+          <li><b>·</b><span>Copy a recent meal, and a calmer first screen</span></li>
+        </ul>
+        <p class="learned">Measure before fixing. The slow start-up took four wrong guesses before the data pointed at the real cause.</p>
+      </article>
+      <article class="cyc">
+        <div class="k"><span class="lbl num">Mid-Sep – Oct 21</span><span class="lbl">The overhaul</span></div>
+        <h3>A redesign, done in steps</h3>
+        <ul>
+          <li><b>·</b><span>Two weeks of research, and an audit with 24 findings</span></li>
+          <li><b>0a</b><span>Fewer tabs: Today, Progress and You</span></li>
+          <li><b>0b</b><span>A new look, picked from a clickable prototype</span></li>
+          <li><b>R</b><span>A new name: Trackaholic</span></li>
+          <li><b>·</b><span>An evaluation to choose the next AI model</span></li>
+          <li><b>·</b><span>Five national food tables, searchable as you type</span></li>
+          <li><b>1</b><span>Foundation: new type, colours and navigation</span></li>
+          <li><b>2</b><span>Logging, Today, Progress and the first run, rebuilt</span></li>
+          <li><b>3a</b><span>Settings became one You page</span></li>
+          <li><b>3b–4</b><span>Every look in light and dark, fewer words, then a polish pass</span></li>
+          <li><b>5</b><span>Shipped to everyone on 17 October</span></li>
+          <li><b>·</b><span>Then its own address, password reset by email, a privacy page and Sign in with Google</span></li>
+        </ul>
+        <p class="learned">Prototype first. Clicking through a look decides it faster than any mock-up I could describe. <a href="#redesign">The full story is below ↓</a></p>
+      </article>
+    </div>
+  </section>
+
+  <section class="sec" id="redesign" aria-labelledby="rd-title">
+    <div class="sec-head"><h2 id="rd-title">The redesign, before any code</h2><span class="lbl">Mid-September to early October 2026</span></div>
+    <p class="quip">Three weeks for a name, one for a whole new look.</p>
+    <div>
+      <article class="cp">
+        <div class="when"><span class="lbl">About 2 weeks</span><span class="date">Mid-Sep – 28 Sep</span></div>
+        <div class="body">
+          <h3>Finding what was wrong</h3>
+          <p class="note">Before designing anything, I spent about two weeks working out what was wrong. I went through every screen, asked people what they disliked about it, and wrote it all down. My conclusion was blunt: "In its current state I cannot onboard the app." So it would be a complete redesign, not a clean-up. The audit ended with 24 findings, led by six tabs, one card style for everything, a log page that opened on the manual form, and a stock slate-and-green look.</p>
+        </div>
+      </article>
+      <article class="cp">
+        <div class="when"><span class="lbl">About 1 week</span><span class="date">Late Sep – 3 Oct</span></div>
+        <div class="body">
+          <div class="h-row"><h3>Designing the redesign</h3><span class="pend">Case study coming</span></div>
+          <p class="note">I started with the layout. Three of the six tabs weren't really places: logging is an action, the weekly review is something you read once a week, and Weight mixed a daily weigh-in with a long-term trend. I placed every feature by how often I actually use it, tried four layouts as clickable wireframes, and chose three tabs, Today, Progress and You, with Log in the middle.</p>
+          <p class="note">Then the look. Most trackers look alike, with white cards, rings and a healthy green, and mine did too. I compared four directions on the same screen, couldn't choose from still images, and picked the winner from a clickable trial: Fields, styled like a training computer's data page. The nutrition-label idea became an optional style.</p>
+          <div class="strip" id="dirStrip">
+            <figure class="shot"><button type="button" data-shot="media/design/dir-a.webp" data-cap="A. Data fields, chosen" aria-label="Open direction A, Data fields"><img src="media/design/dir-a.webp" alt="Direction A, Data fields: big condensed numbers in fixed fields, rules instead of cards, segmented gauges." loading="lazy"></button><figcaption>A. Data fields, chosen</figcaption></figure>
+            <figure class="shot"><button type="button" data-shot="media/design/dir-b.webp" data-cap="B. Nutrition label, now an optional style" aria-label="Open direction B, Nutrition label"><img src="media/design/dir-b.webp" alt="Direction B, Nutrition label: heavy black rules and bold rows like a food packet label." loading="lazy"></button><figcaption>B. Nutrition label, now optional</figcaption></figure>
+            <figure class="shot"><button type="button" data-shot="media/design/dir-c.webp" data-cap="C. Soft and friendly" aria-label="Open direction C, Soft and friendly"><img src="media/design/dir-c.webp" alt="Direction C, Soft and friendly: rounded cards on a warm tint with a ring." loading="lazy"></button><figcaption>C. Soft and friendly</figcaption></figure>
+            <figure class="shot"><button type="button" data-shot="media/design/dir-d.webp" data-cap="D. The category standard" aria-label="Open direction D, the category standard"><img src="media/design/dir-d.webp" alt="Direction D, the category standard: white cards, coloured rings, system font." loading="lazy"></button><figcaption>D. The category standard</figcaption></figure>
+          </div>
+          <p class="src">The four directions as I compared them on 3 October, the same Today screen in each look.</p>
+        </div>
+      </article>
+      <article class="cp">
+        <div class="when"><span class="lbl">About 3 weeks</span><span class="date">13 Sep – 2 Oct</span></div>
+        <div class="body">
+          <h3>Finding a name</h3>
+          <p class="note">"Macros Calculator" had become outdated. The app now does far more than count macros: AI meal estimates, weight trends, water, steps, supplements and a weekly review. The old name didn't do it justice. Finding a new one took about three weeks:</p>
+          <ol class="tries">
+            <li>Names about tracking and fitness. Almost all were taken.</li>
+            <li>Two words combined. None of them felt right.</li>
+            <li>Words from other languages, each with an obvious meaning, a hidden one, or both. Native speakers didn't like my shortlist.</li>
+            <li>Names that just sound nice, without a meaning. I decided against that route.</li>
+            <li>Talking it over with my brother, I dropped the rule that a name had to be completely unused, as long as nothing popular or related had it. Then "Trackaholic" came to me. It fit, because tracking is what the app is about now: meals, weight, water, steps and supplements, not only macros.</li>
+          </ol>
+          <p class="note">I bought the domain the same day, and the app took the name on 6 October. The "-aholic" could read as compulsive, so the tone stays playful.</p>
+        </div>
+      </article>
+      <article class="cp">
+        <div class="when"><span class="lbl">Running</span><span class="date">Since 5 Oct</span></div>
+        <div class="body">
+          <div class="h-row"><h3>Choosing the AI model</h3><span class="pend">Results pending</span></div>
+          <p class="note">The Gemini model the app relies on is being phased out, so I want to choose its replacement on evidence, not on a release note. I'm testing four newer models on the same reference meals, whose real values I know. The runs happen every day on a small home server, and I wrote down how the results would be scored before any came in. The write-up, with what I found, follows when the runs finish.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="sec" id="build" aria-labelledby="build-title">
+    <div class="sec-head"><h2 id="build-title">Under the hood</h2><span class="lbl">Stack and practice</span></div>
+    <p class="quip">The boring parts, done properly.</p>
+    <div class="build">
+      <div class="stack">
+        <div class="sg"><span class="lbl">Backend</span><div class="chipset"><span>Python</span><span>FastAPI</span><span>SQLAlchemy</span><span>Alembic</span><span>PostgreSQL (Neon)</span></div></div>
+        <div class="sg"><span class="lbl">Frontend</span><div class="chipset"><span>React</span><span>TypeScript (strict)</span><span>Vite</span><span>Tailwind CSS</span><span>shadcn/ui + Radix</span><span>Motion</span><span>Recharts</span></div></div>
+        <div class="sg"><span class="lbl">AI and data</span><div class="chipset"><span>Gemini API</span><span>Model fallback</span><span>Five national food tables</span></div></div>
+        <div class="sg"><span class="lbl">App and ops</span><div class="chipset"><span>Installable PWA</span><span>Render</span><span>Vercel</span><span>GitHub Actions</span><span>Playwright</span></div></div>
+      </div>
+      <ul class="practice">
+        <li><b class="num">1,500</b><span>backend tests, including checks that one account can never see another's data</span></li>
+        <li><b>CI</b><span>backend tests and lint, plus frontend type checks, tests, lint and build, on every pull request</span></li>
+        <li><b class="num">0</b><span>violations in an automated WCAG AA accessibility scan of every screen</span></li>
+        <li><b class="num">210</b><span>merged pull requests, shipped one planned phase at a time, with audits between cycles</span></li>
+        <li><b>Daily</b><span>an automated off-site backup of my account's data</span></li>
+        <li><b>Measured</b><span>decisions taken from data: the server's cold start, AI wait times, photo sizes</span></li>
+      </ul>
+    </div>
+    <h3 class="sub">Engineering notes</h3>
+    <div class="notes">
+      <a class="note-card" href="https://github.com/Abdulla1x/Trackaholic/blob/main/docs/incident-2026-07-gemini-eea-region.md" target="_blank" rel="noopener"><span class="lbl">Post-mortem</span><b>AI meal analysis down for three days</b><span>Six hypotheses ruled out before the real cause: the AI provider's free tier was blocked in the region the server ran in. The diagnosis, the move, and the two failures the move caused.</span></a>
+      <a class="note-card" href="https://github.com/Abdulla1x/Trackaholic/blob/main/docs/photo-size-ab-2026-10.md" target="_blank" rel="noopener"><span class="lbl">Experiment</span><b>Picking a photo size with an A/B instead of a hunch</b><span>Shrinking photos to 1024 px looked obvious. Measured against the model's own run-to-run noise, it pushed estimates up, so 1536 px shipped instead.</span></a>
+      <div class="note-card"><span class="lbl">Running</span><b>Choosing the next AI model</b><span>Four models, the same reference meals, and the scoring rules written before any results.</span><span class="pend">Results pending</span></div>
+    </div>
+  </section>
+
+  <section class="sec" id="next" aria-labelledby="next-title">
+    <div class="sec-head"><h2 id="next-title">Where it's going</h2><span class="lbl">After the redesign</span></div>
+    <p class="quip">The tracking continues.</p>
+    <div class="ahead">
+      <div><h3>Training, next to nutrition</h3><p>A workout tracker that's easy to pick up: log sets, reps and weights, and see your progressive overload over time. It lives in the same app, with today's workout beside today's meals and strength trends in Progress next to weight and food. It's the biggest addition planned after the redesign.</p></div>
+      <div><h3>A front door</h3><p>A landing page that opens instantly and a demo account full of data, so anyone can look around before signing up. Then real users beyond me, and later the app stores.</p></div>
+      <div><h3>Fast from the first tap</h3><p>No minute-long wake-up on the first visit, and screens that feel instant on a mid-range phone.</p></div>
+      <div><h3>AI I can stand behind</h3><p>Meal estimates close enough to trust, with the accuracy measured rather than assumed.</p></div>
+      <div><h3>Good at the food I eat</h3><p>South Asian and Gulf home cooking: salan, roti, khubz. The big national tables barely cover it, which makes it the place to be best.</p></div>
+    </div>
+    <p class="close">It started as a sum I was tired of doing by hand. Each version since holds a little more of what I learned that year.</p>
+  </section>
+
+  <section class="about" aria-label="About me">
+    <p>Built by <b>Mohammad Abdullah</b>.</p>
+    <p><a href="https://github.com/Abdulla1x" target="_blank" rel="noopener">github.com/Abdulla1x</a> · <a href="https://www.linkedin.com/in/abdulla1x/" target="_blank" rel="noopener">linkedin.com/in/abdulla1x</a></p>
+  </section>
+
+  <footer class="foot">
+    <p>Every screenshot is the whole page. Phone captures are 390 px wide, desktop 1280 px. Open one, or scroll inside the comparison frame, to see all of it. Clips are headless recordings, so no finger or cursor is drawn.</p>
+    <p>The terminal transcripts are the original scripts from those commits, run again with demo inputs.</p>
+    <p>The AI estimate in the screenshots and clips is a stand-in answer (no model call). Its text mentions a saved food, which the July 2026 build couldn't use yet.</p>
+  </footer>
+</div>
+
+<button type="button" class="totop" id="totop" hidden>↑ Top</button>
+
+<dialog id="dlg" aria-label="Screenshot">
+  <div class="dlg"><div class="dlg-top"><span id="dlgcap"></span><div class="dlg-nav"><button class="x" id="dlgprev" aria-label="Previous screenshot">‹</button><span id="dlgpos" class="num"></span><button class="x" id="dlgnext" aria-label="Next screenshot">›</button><button class="x" id="dlgx">Close</button></div></div><div class="dlg-scroll"></div></div>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+  var PAGES = { dashboard: 'Dashboard', 'log-meal': 'Log a meal', 'ai-analysis': 'AI estimate', 'ai-applied': 'Estimate applied', weight: 'Weight', analytics: 'Analytics', review: 'Weekly review', settings: 'Settings' };
+  var CLIPS = { tour: 'Walk through every screen', 'ai-logging': 'Log a meal with AI', settings: 'Settings', weight: 'Weight trend', 'first-use': 'A new account, first run', appearance: 'Make it yours' };
+  var EIGHT = ['dashboard', 'log-meal', 'ai-analysis', 'ai-applied', 'weight', 'analytics', 'review', 'settings'];
+
+  /* Real transcripts: each script run from its own commit with demo inputs.
+     Text between ⟨ and ⟩ is what was typed. */
+  var T_V0 = 'Enter the weight in grams: ⟨80⟩\nEnter the serving size: ⟨40⟩\nEnter the calories per serving: ⟨150⟩\nEnter the amount of protein per serving: ⟨5⟩\nCalories:  300.0 \n Protein:  10.0';
+  var T_V1 = "Do you want to calculate the macros of a single item or multiple items?\nEnter 'S' for single item or 'M' for multiple items: ⟨M⟩\nEnter the weight in grams: ⟨200⟩\nEnter the serving size: ⟨100⟩\nEnter the calories per serving: ⟨165⟩\nEnter the amount of protein per serving: ⟨31⟩\nCalories (Ingredient):  330.0 \nProtein (Ingredient):  62.0\nDo you want to add another ingredient?\nEnter 'Y' for yes or 'N' for no: ⟨Y⟩\nEnter the weight in grams: ⟨180⟩\nEnter the serving size: ⟨100⟩\nEnter the calories per serving: ⟨130⟩\nEnter the amount of protein per serving: ⟨2.7⟩\nCalories (Ingredient):  234.0 \nProtein (Ingredient):  4.86\nDo you want to add another ingredient?\nEnter 'Y' for yes or 'N' for no: ⟨N⟩\nTotal Calories:  564.0 \nTotal Protein:  66.86\nDo you want to save this meal?\nEnter 'Y' for yes or 'N' for no: ⟨Y⟩\nEnter the date in (Day-Month-Year) format: ⟨26-07-2024⟩\nEnter the name of the meal: ⟨Chicken & Rice⟩\n{'26-07-2024': {'Chicken & Rice': [564.0, 66.86]}}";
+  var T_V2 = "Welcome to the Macros Calculator!\nWhat do you wish to do today?\n---------------------------------\n1. Calculate Macros\n2. Display Stored Meals\n3. Display total Calorie and Protein Intake\n4. Calculate Average Calorie and Protein Intake\nType the corresponding number to select the option: ⟨3⟩\nEnter the date of which you wish to view total calorie and protein intake in (Day-Month-Year) format: ⟨11-04-2025⟩\nThe total calorie intake for the given date is:  1044.0\nThe total protein intake for the given date is:  106.86\nDo you want to store this data?\nEnter 'Y' for yes or 'N' for no: ⟨N⟩";
+
+  var CPS = [
+    { id: '2024-07', date: '2024-07-16', title: 'A calculator in a terminal', term: [
+        { cap: 'Day one, 16 July 2024 (commit 8c275f4)', text: T_V0 },
+        { cap: 'Ten days later, 26 July 2024 (commit e4c5ea0): a meal with two ingredients, saved by date', text: T_V1 } ],
+      note: 'Nine lines on the first day: weight, serving size, calories and protein in, totals out. By 26 July it handled meals with several ingredients, refused bad input, and saved each meal under its date in a JSON file.',
+      src: 'Run again today from the original commits' },
+    { id: '2025-04', date: '2025-04-11', title: 'A menu and a memory', term: [
+        { cap: '11 April 2025 (commit eef5228): the new menu, totalling a saved day', text: T_V2 } ],
+      note: 'I came back to it the next spring. It got a menu, could list the meals saved for a day, total a day\'s calories and protein, keep those totals, and average them over a date range.',
+      src: 'Run again today from commit eef5228' },
+    { id: '2026-03', date: '2025', title: 'Streamlit, built through 2025', wide: true,
+      note: 'I started the Streamlit version in May 2025 and built most of it over that year on my laptop: tabs for one item, several items, the daily summary and a chart, stored in SQLite, with a script to move the old JSON logs across. Calories and protein only, and it only ran on my machine. It reached GitHub in one go in March 2026, when I started syncing the project between devices. The analytics filters and CSV import and export reached GitHub in April 2026.',
+      src: 'Screenshots taken March 2026 (commit fb274eb)',
+      stills: ['single_item', 'multi_item', 'daily_summary', 'analytics'],
+      names: { single_item: 'Single item', multi_item: 'Multiple items', daily_summary: 'Daily summary', analytics: 'Analytics' } },
+    { id: 'early-2026', date: 'Early 2026', title: 'Deciding what comes next', text: true,
+      note: 'At the start of 2026 I began researching what the app should become: which stack to build it on, how to put it online, how accounts and AI meal estimates would work. I learned a lot along the way. The plan was to go all in over the summer, when I would have the time to turn the ideas into a real app.' },
+    { id: '2026-07', date: '2026-07-09', title: 'First deployment: React, accounts, AI',
+      note: 'A ground-up rebuild, planned since early 2026: a React app with a FastAPI backend, sign-in, macro rings and AI meal estimates, put online on 9 July. Four pages. Brought back to life on 2026-10-09 from its own commit and filled with the same demo data, so it can sit beside today.',
+      src: 'Build 4e1ba7c, run again locally', map: { 'log-meal': 'log' },
+      stills: ['dashboard', 'log-meal', 'analytics', 'settings'], clips: ['tour', 'ai-logging', 'settings'] },
+    { id: '2026-08', date: '2026-08-29', title: 'A real phone app',
+      note: 'A bottom tab bar, installable on the home screen, with weight, the weekly review, water, steps and supplements added along the way.',
+      src: 'README screenshots, commit 2d89daf', stills: EIGHT },
+    { id: '2026-09', date: '2026-09-09', title: 'A calmer first screen',
+      note: 'The dashboard trimmed to what matters first: today\'s meals at the top, everything else a tap away.',
+      src: 'README screenshots, commit ee938ad', stills: EIGHT },
+    { id: '2026-10', date: '2026-10-09', title: 'Trackaholic, before the redesign',
+      note: 'Renamed Trackaholic. Food search across five national food tables. Six tabs, one card style for everything, and a log page that leads with the manual form. This is the "before" the redesign is measured against.',
+      src: 'Captured 2026-10-09 at be6676b', stills: EIGHT, clips: ['tour', 'ai-logging', 'settings', 'weight'] },
+    { id: '2026-10f', date: '2026-10-09', title: 'Redesign, step 1: the new frame',
+      note: 'The first redesign step. The new typeface and colours, and the new navigation: Today, Progress and You, with Log in the middle on phones and a side rail on wide screens. The pages inside are still the old ones, rebuilt in the next steps, so this stage looks deliberately in between.',
+      src: 'Captured 2026-10-09, Foundation (the revamp branch)', stills: EIGHT, clips: ['tour', 'ai-logging', 'settings', 'weight'] },
+    { id: '2026-10a', date: '2026-10-10', title: 'Redesign, step 2a: logging, rebuilt',
+      note: 'Log became a panel that slides over whatever page you are on, with the AI first. An estimate keeps running while you use the rest of the app, and saves straight from its result. When a photo is all it has, it asks about the oil and sauces a camera misses. Saved and recent meals moved in from the dashboard, and the form for entering a meal by hand got the new look. Today and Progress are still the old pages; they are next.',
+      src: 'Captured 2026-10-10, phase 2a (the revamp branch)', stills: EIGHT,
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight'] },
+    { id: '2026-10b', date: '2026-10-10', title: 'Redesign, step 2b: Today, rebuilt',
+      note: 'Today now opens on one big number, the calories left, with a segmented gauge running up to the target and the digits rolling as meals are logged. Going over just fills the gauge; nothing turns red. Each meal is one row that opens its own screen, and deleting one leaves ten seconds to undo it. The weigh-in became a card on Today that carries its own reminder, and every tracker got a full row. Progress is still the old page; it is next.',
+      src: 'Captured 2026-10-10, phase 2b (the revamp branch)', stills: EIGHT.concat(['day', 'meal']),
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight'] },
+    { id: '2026-10c', date: '2026-10-11', title: 'Redesign, step 2c: Progress, rebuilt',
+      note: 'Weight, nutrition and the weekly look back became one Progress page with a single range, and today\'s meals stay out of the charts until the day is over. Every weigh-in can be corrected from a list, each day\'s totals read as rows instead of a wide table, and the daily burn moved here from Settings. A new account sees how close each part is to unlocking instead of an empty chart, and the moment one unlocks is marked, once.',
+      src: 'Captured 2026-10-11, phase 2c (the revamp branch)', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy']),
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight'] },
+    { id: '2026-10d', date: '2026-10-12', title: 'Redesign, step 2d: the first run',
+      note: 'A brand-new account no longer meets a target nobody chose. Today shows what was eaten and two steps to get started: set a target, then log a first meal. Setup asks one question per screen, catches typos where they are made, and shows the target live from the server\'s own calculation, naming any limit that changed the pace. Every rule behind that target was checked against a published source first. New accounts choose their trackers, there is no popup on the first visit, and two short pages explain how the app works and how the target is worked out, with your own numbers.',
+      src: 'Captured 2026-10-12, phase 2d (the revamp branch)', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy', 'first-use', 'setup', 'setup-target', 'how-it-works', 'target-sum']),
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy', 'first-use': 'A new account', setup: 'Setup, one question', 'setup-target': 'Setup, the target', 'how-it-works': 'How it works', 'target-sum': 'How the target is worked out' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight', 'first-use'] },
+    { id: '2026-10e', date: '2026-10-12', title: 'Redesign, step 3a: one You page',
+      note: 'Settings became You: one page of rows, grouped from the things you change daily to the ones you change once, each showing what it is set to, so most visits end without opening anything. A row opens its own screen, where typed numbers wait for a Save bar and leaving with unsaved changes asks first. Supplements, foods and saved meals open in a sheet over their list. Your data can be exported, imported or downloaded from three rows, logging out asks first, and deleting the account is plain words on its own screen, with the download offered first. The calories band also gave each macro its own row.',
+      src: 'Captured 2026-10-12, phase 3a (the revamp branch)', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy', 'first-use', 'setup', 'setup-target', 'how-it-works', 'target-sum', 'you-targets', 'you-water', 'you-supplements', 'you-library', 'you-delete']),
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy', 'first-use': 'A new account', setup: 'Setup, one question', 'setup-target': 'Setup, the target', 'how-it-works': 'How it works', 'target-sum': 'How the target is worked out', settings: 'You', 'you-targets': 'Daily targets', 'you-water': 'Water', 'you-supplements': 'A supplement, in a sheet', 'you-library': 'A food, in a sheet', 'you-delete': 'Delete account' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight', 'first-use'] },
+    { id: '2026-10g', date: '2026-10-12', title: 'Redesign, step 3b: make it yours',
+      note: 'The app learned light. Automatic follows the phone, or it can stay Light or Dark, in one of nine colours, each checked for readable contrast in both. A second style, Label, draws every screen like the black-and-white label on a food pack, and the calories become a real nutrition label. The choice belongs to the phone rather than the account, and it is in place before the first frame, so a dark phone never flashes white. Everything below is light Daylight, the look a new visitor on a light phone gets; try the rest underneath.',
+      src: 'Captured 2026-10-12, phase 3b (the revamp branch)', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy', 'first-use', 'setup', 'setup-target', 'how-it-works', 'target-sum', 'you-targets', 'you-water', 'you-supplements', 'you-library', 'you-delete', 'appearance', 'appearance-dark', 'appearance-label', 'log-meal-dark', 'log-meal-label', 'sign-in-dark', 'sign-in-label']),
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy', 'first-use': 'A new account', setup: 'Setup, one question', 'setup-target': 'Setup, the target', 'how-it-works': 'How it works', 'target-sum': 'How the target is worked out', settings: 'You', 'you-targets': 'Daily targets', 'you-water': 'Water', 'you-supplements': 'A supplement, in a sheet', 'you-library': 'A food, in a sheet', 'you-delete': 'Delete account', appearance: 'Appearance', 'appearance-dark': 'Appearance, dark', 'appearance-label': 'Appearance, Label', 'log-meal-dark': 'Log panel, dark', 'log-meal-label': 'Log panel, Label', 'sign-in-dark': 'Log in, dark', 'sign-in-label': 'Log in, Label' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight', 'first-use', 'appearance'],
+      looks: {"mobile":{"today":{"w":660,"h":[2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,2880,3132,3132]},"progress":{"w":660,"h":[2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2562,2752,2752]},"you":{"w":660,"h":[3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3019,3407,3407]}},"desktop":{"today":{"w":1280,"h":[1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1522,1619,1619]},"progress":{"w":1280,"h":[1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1070,1129,1129]},"you":{"w":1280,"h":[1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1735,1928,1928]}}}},
+    { id: '2026-10h', date: '2026-10-13', title: 'Redesign, step 3c: my own protein, and fewer words',
+      note: 'Two quieter changes after the look. Calories can stay worked out while I set protein myself: type a number and fat gives way first, then carbs, so the day still adds up, and a number that cannot fit is refused. And a lot of words came out: screens say less, and the longer reasons sit behind "How is this worked out?". Three one-line tips now point at things that are easy to miss: my saved foods while I describe a meal, keeping a meal I log often as a saved meal, and bringing in my step history. Each one closes with ✕ and stays closed. Here the daily targets show my own protein, and the Log panel shows the saved-foods tip; the other two stay out of these pages, because the demo account already counts steps and the saved-meal tip lives on the copy form.',
+      src: 'Captured 2026-10-13, phase 3c (the revamp branch)', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy', 'first-use', 'setup', 'setup-target', 'how-it-works', 'target-sum', 'you-targets', 'you-water', 'you-supplements', 'you-library', 'you-delete', 'appearance', 'appearance-dark', 'appearance-label', 'log-meal-dark', 'log-meal-label', 'sign-in-dark', 'sign-in-label', 'log-hint']),
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy', 'first-use': 'A new account', setup: 'Setup, one question', 'setup-target': 'Setup, the target', 'how-it-works': 'How it works', 'target-sum': 'How the target is worked out', settings: 'You', 'you-targets': 'Daily targets, my own protein', 'you-water': 'Water', 'you-supplements': 'A supplement, in a sheet', 'you-library': 'A food, in a sheet', 'you-delete': 'Delete account', appearance: 'Appearance', 'appearance-dark': 'Appearance, dark', 'appearance-label': 'Appearance, Label', 'log-meal-dark': 'Log panel, dark', 'log-meal-label': 'Log panel, Label', 'sign-in-dark': 'Log in, dark', 'sign-in-label': 'Log in, Label', 'log-hint': 'Log panel, a tip' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight', 'first-use', 'appearance'] },
+    { id: '2026-10i', date: '2026-10-15', title: 'Redesign, step 4: polish',
+      note: 'The small things, found by going over every redesigned screen. Every button, chip and row now answers a tap: it darkens, and buttons dip slightly while held, because a phone has no hover to fall back on. On a desktop, text stops at about 65 characters a line instead of running across the whole column, and buttons and fields size to what they hold. Headings snapped to the type scale, numbers and times read the same everywhere, anything that fails to load says so with Retry, text fields show a focus ring, and a new account\'s weekly review says when it starts instead of calling an empty week off target.',
+      src: 'Captured 2026-10-15, phase 4 (the revamp branch)', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy', 'first-use', 'setup', 'setup-target', 'how-it-works', 'target-sum', 'you-targets', 'you-water', 'you-supplements', 'you-library', 'you-delete', 'appearance', 'appearance-dark', 'appearance-label', 'log-meal-dark', 'log-meal-label', 'sign-in-dark', 'sign-in-label', 'log-hint', 'review-new']),
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy', 'first-use': 'A new account', setup: 'Setup, one question', 'setup-target': 'Setup, the target', 'how-it-works': 'How it works', 'target-sum': 'How the target is worked out', settings: 'You', 'you-targets': 'Daily targets, my own protein', 'you-water': 'Water', 'you-supplements': 'A supplement, in a sheet', 'you-library': 'A food, in a sheet', 'you-delete': 'Delete account', appearance: 'Appearance', 'appearance-dark': 'Appearance, dark', 'appearance-label': 'Appearance, Label', 'log-meal-dark': 'Log panel, dark', 'log-meal-label': 'Log panel, Label', 'sign-in-dark': 'Log in, dark', 'sign-in-label': 'Log in, Label', 'log-hint': 'Log panel, a tip', 'review-new': 'The review, a new account' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight', 'first-use', 'appearance'] },
+    { id: '2026-10j', date: '2026-10-17', title: 'The redesign, shipped',
+      note: 'Live for everyone on 17 October, after a final check of every screen at both widths and on my phone. The whole redesign went out in one release: Today, Progress and You with Log in the middle, light and dark in nine colours plus Label, shorter words, and the polish. Existing accounts kept every meal and setting, and were asked once which trackers to keep. The first fixes from using it on my phone went out the same day: a refusal for a protein number that cannot fit now says it in one line, the weekly review rounds its averages once, meal names line up whether or not a time sits beside them, and a screen title that does not fit wraps instead of being cut off.',
+      src: 'Captured 2026-10-17 from main, the release plus the same day\'s fixes', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy', 'first-use', 'setup', 'setup-target', 'how-it-works', 'target-sum', 'you-targets', 'you-water', 'you-supplements', 'you-library', 'you-delete', 'appearance', 'appearance-dark', 'appearance-label', 'log-meal-dark', 'log-meal-label', 'sign-in-dark', 'sign-in-label', 'log-hint', 'review-new']),
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy', 'first-use': 'A new account', setup: 'Setup, one question', 'setup-target': 'Setup, the target', 'how-it-works': 'How it works', 'target-sum': 'How the target is worked out', settings: 'You', 'you-targets': 'Daily targets, my own protein', 'you-water': 'Water', 'you-supplements': 'A supplement, in a sheet', 'you-library': 'A food, in a sheet', 'you-delete': 'Delete account', appearance: 'Appearance', 'appearance-dark': 'Appearance, dark', 'appearance-label': 'Appearance, Label', 'log-meal-dark': 'Log panel, dark', 'log-meal-label': 'Log panel, Label', 'sign-in-dark': 'Log in, dark', 'sign-in-label': 'Log in, Label', 'log-hint': 'Log panel, a tip', 'review-new': 'The review, a new account' },
+      clips: ['tour', 'ai-logging', 'settings', 'weight', 'first-use', 'appearance'] }
+  ];
+  var SOON = [];
+
+  var COMMITS = [['2024-07', 8], ['2024-08', 0], ['2024-09', 0], ['2024-10', 0], ['2024-11', 0], ['2024-12', 0], ['2025-01', 0], ['2025-02', 0], ['2025-03', 0], ['2025-04', 3],
+    ['2025-05', 2], ['2025-06', 0], ['2025-07', 0], ['2025-08', 1], ['2025-09', 0], ['2025-10', 0], ['2025-11', 0], ['2025-12', 0], ['2026-01', 0], ['2026-02', 0], ['2026-03', 11], ['2026-04', 3],
+    ['2026-05', 0], ['2026-06', 0], ['2026-07', 41], ['2026-08', 174], ['2026-09', 96], ['2026-10', 412]];
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  var width = 'mobile';
+  try { width = localStorage.getItem('tt-width') || 'mobile'; } catch (e) {}
+
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) { if (k === 'text') n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c) n.appendChild(c); });
+    return n;
+  }
+  function monthName(ym) { var p = ym.split('-'); return MON[+p[1] - 1] + ' ' + p[0]; }
+
+  /* commit chart */
+  (function () {
+    var grid = document.getElementById('chartGrid'), ticks = document.getElementById('chartTicks'), body = document.querySelector('#chartTable tbody');
+    var max = Math.max.apply(null, COMMITS.map(function (c) { return c[1]; }));
+    COMMITS.forEach(function (c, idx) {
+      var n = c[1], pct = n / max * 100;
+      var bar = el('span', { class: 'bar' + (n ? '' : ' zero') });
+      bar.style.setProperty('--i', idx);
+      bar.style.height = n ? 'max(2px, ' + pct.toFixed(2) + '%)' : '0';
+      var col = el('div', { class: 'col' }, [
+        el('span', { class: 'val', text: n ? String(n) : '' }), bar,
+        el('button', { class: 'hit', type: 'button', 'aria-label': monthName(c[0]) + ': ' + n + ' commits' }),
+        el('span', { class: 'tip', text: monthName(c[0]) + ' · ' + n + (n === 1 ? ' commit' : ' commits') })
+      ]);
+      grid.appendChild(col);
+      var m = +c[0].split('-')[1];
+      ticks.appendChild(el('span', { text: (m === 1 || m === 7) ? MON[m - 1] + ' ’' + c[0].slice(2, 4) : '' }));
+      if (n) body.appendChild(el('tr', {}, [el('td', { text: monthName(c[0]) }), el('td', { text: String(n) })]));
+    });
+  })();
+
+  /* width switch */
+  var seg = document.getElementById('width');
+  [['mobile', 'Phone'], ['desktop', 'Desktop']].forEach(function (pair) {
+    var b = el('button', { type: 'button', 'aria-pressed': String(pair[0] === width), 'data-w': pair[0], text: pair[1] });
+    b.addEventListener('click', function () {
+      width = pair[0];
+      try { localStorage.setItem('tt-width', width); } catch (e) {}
+      seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.w === width)); });
+      renderTimeline(); renderCompare();
+      if (lively()) arm();
+    });
+    seg.appendChild(b);
+  });
+
+  function stillBase(cp, page, w) {
+    if (cp.wide) return 'media/' + cp.id + '/' + page;
+    var file = (cp.map && cp.map[page]) || page;
+    return 'media/' + cp.id + '/' + w + '/' + file;
+  }
+  /* A still as an image. A strip (lazy) gets the -t file, a small crop of the
+     page's top, which is all its frame shows. The viewer and the comparison
+     get the whole page, and desktop pages add the capture's own 2560 px file
+     for sharp screens. Two July desktop pages were cropped differently from
+     their captures, so they have no 2x file. */
+  var NO2X = { 'media/2026-07/desktop/dashboard': 1, 'media/2026-07/desktop/settings': 1 };
+  function stillView(cp, page, w, alt, lazy, sizes) {
+    var base = stillBase(cp, page, w);
+    var attrs = { alt: alt, decoding: 'async' };
+    if (lazy) { attrs.loading = 'lazy'; attrs.src = base + '-t.webp'; return el('img', attrs); }
+    if ((cp.wide || w === 'desktop') && !NO2X[base]) { attrs.srcset = base + '.webp 1280w, ' + base + '-2x.webp 2560w'; attrs.sizes = sizes; }
+    attrs.src = base + '.webp';
+    return el('img', attrs);
+  }
+
+  /* dialog: the whole page, at its own width, scrollable */
+  var dlg = document.getElementById('dlg'), dscroll = dlg.querySelector('.dlg-scroll');
+  document.getElementById('dlgx').addEventListener('click', function () { dlg.close(); });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+  /* The viewer steps through the strip a shot was opened from: the ‹ ›
+     buttons, the arrow keys, or a sideways swipe on a phone (an up-and-down
+     drag still scrolls the page). */
+  var shots = [], at = 0;
+  var prevB = document.getElementById('dlgprev'), nextB = document.getElementById('dlgnext');
+  function showShot(i) {
+    at = Math.max(0, Math.min(shots.length - 1, i));
+    var s = shots[at];
+    var v = s.view ? s.view() : el('img', { src: s.url, alt: s.cap });
+    v.style.setProperty('--natw', s.natw + 'px');
+    dscroll.textContent = ''; dscroll.appendChild(v);
+    document.getElementById('dlgcap').textContent = s.cap;
+    document.getElementById('dlgpos').textContent = shots.length > 1 ? (at + 1) + ' / ' + shots.length : '';
+    prevB.hidden = nextB.hidden = shots.length < 2;
+    prevB.disabled = at === 0; nextB.disabled = at === shots.length - 1;
+    dscroll.scrollTop = 0;
+  }
+  function openShot(list, i) {
+    shots = list;
+    showShot(i);
+    if (!dlg.open) dlg.showModal();
+  }
+  prevB.addEventListener('click', function () { showShot(at - 1); });
+  nextB.addEventListener('click', function () { showShot(at + 1); });
+  dlg.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); showShot(at - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); showShot(at + 1); }
+  });
+  var sx = null, sy = 0;
+  dscroll.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) { sx = null; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, { passive: true });
+  dscroll.addEventListener('touchend', function (e) {
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    sx = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) showShot(at + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  function termBlock(t) {
+    var pre = el('pre', { tabindex: '0' });
+    var lines = t.text.split('\n');
+    lines.forEach(function (line, i) {
+      var tl = el('span', { class: 'tl' });
+      tl.style.setProperty('--i', i);
+      line.split(/(⟨[^⟩]*⟩)/).forEach(function (part) {
+        if (part.charAt(0) === '⟨') tl.appendChild(el('span', { class: 'in', text: part.slice(1, -1) }));
+        else if (part) tl.appendChild(document.createTextNode(part));
+      });
+      pre.appendChild(tl);
+      if (i < lines.length - 1) pre.appendChild(document.createTextNode('\n'));
+    });
+    return el('figure', { class: 'term' }, [pre, el('figcaption', { text: t.cap })]);
+  }
+
+  /* Try a look (3b on). Each screen and width has its twenty looks as
+     separate captures: each palette light then dark, then Label light and
+     dark. `looks` holds each one's height, so the frame keeps its shape while
+     the next look loads. */
+  var LOOK_PAL = [['daylight', 'Daylight', '#e4e7e1', '#e4e7e1', '#1747e0'], ['ocean', 'Ocean', '#dce5ee', '#0e2a47', '#0b57c4'],
+    ['teal', 'Teal', '#dde9e6', '#0d3b3a', '#0b6b62'], ['citrus', 'Citrus', '#f3f3ee', '#24561f', '#c2410c'],
+    ['violet', 'Violet', '#e6e2ee', '#2a1a5e', '#5b2fc9'], ['berry', 'Berry', '#ecdfe7', '#3a1430', '#8c1a5a'],
+    ['clay', 'Clay', '#ece3dc', '#63301f', '#a33c12'], ['sand', 'Sand', '#eae1d2', '#2b2420', '#12595e'],
+    ['ember', 'Ember', '#e3e5e8', '#131416', '#b3121b']];
+  var LOOK_DARK = { daylight: ['#0b0e0c', '#0b0e0c', '#7d9bff'], ocean: ['#06101a', '#0f2d4d', '#6fa8ff'], teal: ['#071413', '#0e3634', '#4fd1c1'],
+    citrus: ['#0f110c', '#1f4a1b', '#ff9a4d'], violet: ['#0d0a17', '#2b1b60', '#a98bff'], berry: ['#120a10', '#3d1633', '#ff8fc8'],
+    clay: ['#140d0a', '#4a2216', '#ff8a5c'], sand: ['#14110d', '#2e2621', '#5cc6c9'], ember: ['#0b0c0e', '#1b1d21', '#ff4d55'] };
+  var LOOK_SCREENS = [['today', 'Today'], ['progress', 'Progress'], ['you', 'You']];
+  var look = { screen: 'today', theme: 'light', palette: 'daylight', style: 'fields' };
+  try {
+    var savedLook = JSON.parse(localStorage.getItem('tt-look') || 'null');
+    if (savedLook) for (var lk in look) if (typeof savedLook[lk] === 'string') look[lk] = savedLook[lk];
+  } catch (e) {}
+  function lookIndex() {
+    var dark = look.theme === 'dark' ? 1 : 0;
+    if (look.style === 'label') return 18 + dark;
+    var i = LOOK_PAL.map(function (p) { return p[0]; }).indexOf(look.palette);
+    return Math.max(i, 0) * 2 + dark;
+  }
+  function lookBlock(cp) {
+    var box = el('div', { class: 'looks' });
+    var scroll = el('div', { class: 'lk-scroll' + (width === 'mobile' ? ' phone' : ''), tabindex: '0', 'aria-label': 'The screen in the chosen look, scrollable' });
+    var img = el('img', { alt: '' });
+    var tile = el('div', { class: 'lk-tile' }, [img, el('span', { class: 'lk-wait', text: 'Loading…' })]);
+    scroll.appendChild(tile);
+    var cap = el('p', { class: 'lk-cap', 'aria-live': 'polite' });
+    img.addEventListener('load', function () { img.classList.add('ready'); });
+    var groups = [];
+    function seg(label, key, pairs) {
+      var g = el('div', { class: 'seg', role: 'group', 'aria-label': label });
+      pairs.forEach(function (pair) {
+        var b = el('button', { type: 'button', 'data-v': pair[0], text: pair[1] });
+        b.addEventListener('click', function () {
+          if (key === 'screen' && look.screen !== pair[0]) scroll.scrollTop = 0;
+          look[key] = pair[0]; draw();
+        });
+        g.appendChild(b);
+      });
+      groups.push([key, g]);
+      return g;
+    }
+    var sw = el('div', { class: 'lk-sw', role: 'group', 'aria-label': 'Colour' });
+    LOOK_PAL.forEach(function (p) {
+      var chip = el('span', {}, [el('i'), el('i')]);
+      var b = el('button', { type: 'button', 'data-v': p[0], 'aria-label': p[1], title: p[1] }, [chip]);
+      b.addEventListener('click', function () { look.palette = p[0]; draw(); });
+      sw.appendChild(b);
+    });
+    function draw() {
+      var sizes = cp.looks && cp.looks[width];
+      var dims = sizes && sizes[look.screen];
+      groups.forEach(function (g) {
+        g[1].querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === look[g[0]])); });
+      });
+      var dark = look.theme === 'dark';
+      sw.querySelectorAll('button').forEach(function (b, i) {
+        var p = LOOK_PAL[i], c = dark ? LOOK_DARK[p[0]] : p.slice(2);
+        var parts = b.firstChild.children;
+        parts[0].style.background = c[0];
+        parts[0].style.boxShadow = 'inset 0 -4px 0 ' + c[1];
+        parts[1].style.background = c[2];
+        b.disabled = look.style === 'label';
+        b.setAttribute('aria-pressed', String(look.style !== 'label' && p[0] === look.palette));
+      });
+      try { localStorage.setItem('tt-look', JSON.stringify(look)); } catch (e) {}
+      if (!dims) return;
+      var k = lookIndex();
+      var key = (dark ? 'dark' : 'light') + '-' + (look.style === 'label' ? 'label' : LOOK_PAL[Math.floor(k / 2)][0]);
+      var base = 'media/' + cp.id + '/' + width + '/looks/' + look.screen + '/' + key;
+      if (img.getAttribute('src') !== base + '.webp') {
+        img.classList.remove('ready');
+        if (width === 'desktop') { img.srcset = base + '.webp 1280w, ' + base + '-2x.webp 2560w'; img.sizes = 'min(980px, 100vw)'; }
+        img.src = base + '.webp';
+      }
+      tile.style.aspectRatio = dims.w + ' / ' + dims.h[k];
+      var screenName = LOOK_SCREENS.filter(function (s) { return s[0] === look.screen; })[0][1];
+      var lookName = look.style === 'label' ? 'Label' : LOOK_PAL[Math.floor(k / 2)][1];
+      var text = screenName + ' · ' + lookName + ' · ' + (dark ? 'Dark' : 'Light');
+      img.alt = text + ', ' + cp.date;
+      cap.textContent = text;
+    }
+    box.appendChild(el('h4', { text: 'Try a look' }));
+    box.appendChild(el('p', { class: 'lk-intro', text: 'The same three screens, captured in every look the app offers: nine colours in light and dark, and Label. The Phone and Desktop switch above changes the width.' }));
+    box.appendChild(el('div', { class: 'lk-ctl' }, [
+      seg('Screen', 'screen', LOOK_SCREENS),
+      seg('Theme', 'theme', [['light', 'Light'], ['dark', 'Dark']]),
+      seg('Style', 'style', [['fields', 'Fields'], ['label', 'Label']])
+    ]));
+    box.appendChild(sw);
+    box.appendChild(scroll);
+    box.appendChild(cap);
+    draw();
+    return box;
+  }
+
+  function renderTimeline() {
+    var host = document.getElementById('cps');
+    host.textContent = '';
+    CPS.forEach(function (cp) {
+      var media = null;
+      if (cp.text) {
+        media = null;
+      } else if (cp.term) {
+        media = el('div', { class: 'terms' }, cp.term.map(termBlock));
+      } else {
+        media = el('div', { class: 'strip' });
+        (cp.clips || []).forEach(function (c) {
+          var base = 'media/' + cp.id + '/' + width + '/' + c;
+          var v = el('video', { src: base + '.mp4', poster: base + '-poster.webp', controls: '', preload: 'none', playsinline: '', muted: '', 'aria-label': CLIPS[c] + ', ' + cp.date });
+          media.appendChild(el('figure', { class: 'shot' }, [v, el('figcaption', { text: '▶ ' + CLIPS[c] })]));
+        });
+        var ar = cp.wide ? '16 / 9' : (width === 'mobile' ? '390 / 844' : '1280 / 832');
+        var natw = cp.wide || width === 'desktop' ? 1280 : 390;
+        var list = [];
+        cp.stills.forEach(function (p, i) {
+          var name = (cp.names && cp.names[p]) || PAGES[p] || p;
+          var img = stillView(cp, p, width, name + ', ' + cp.date, true);
+          var btn = el('button', { type: 'button', 'aria-label': 'Open the full ' + name + ' page' }, [img, el('span', { class: 'fp', text: 'Full page' })]);
+          btn.style.setProperty('--ar', ar);
+          list.push({ view: stillView.bind(null, cp, p, width, name + ' · ' + cp.date, false, 'min(1280px, 96vw)'), cap: name + ' · ' + cp.date, natw: natw });
+          btn.addEventListener('click', function () { openShot(list, i); });
+          media.appendChild(el('figure', { class: 'shot' }, [btn, el('figcaption', { text: name })]));
+        });
+      }
+      var body = el('div', { class: 'body' + (cp.wide || width === 'desktop' ? ' wide' : '') }, [
+        el('h3', { text: cp.title }), el('p', { class: 'note', text: cp.note }), media, cp.looks ? lookBlock(cp) : null, cp.src ? el('p', { class: 'src', text: cp.src }) : null
+      ]);
+      host.appendChild(el('article', { class: 'cp', id: 'cp-' + cp.id }, [
+        el('div', { class: 'when' }, [el('span', { class: 'lbl', text: 'Checkpoint' }), el('span', { class: 'date num', text: cp.date })]), body
+      ]));
+    });
+    SOON.forEach(function (s) {
+      host.appendChild(el('article', { class: 'cp soon' }, [
+        el('div', { class: 'when' }, [el('span', { class: 'lbl', text: 'Redesign step' }), el('span', { class: 'date', text: 'Coming' })]),
+        el('div', { class: 'body' }, [el('h3', { text: s[0] }), el('p', { class: 'note', text: s[1] })])
+      ]));
+    });
+  }
+
+  /* comparison */
+  var selA = document.getElementById('cmpA'), selB = document.getElementById('cmpB'), selP = document.getElementById('cmpPage');
+  var tall = CPS.filter(function (c) { return c.stills && !c.wide; });
+  tall.forEach(function (cp) {
+    var label = cp.date + ' · ' + cp.title.split(':')[0].split(',')[0];
+    selA.appendChild(el('option', { value: cp.id, text: label }));
+    selB.appendChild(el('option', { value: cp.id, text: label }));
+  });
+  selA.value = '2026-07'; selB.value = tall[tall.length - 1].id;
+  ['dashboard', 'log-meal', 'analytics', 'settings', 'weight', 'review'].forEach(function (p) { selP.appendChild(el('option', { value: p, text: PAGES[p] })); });
+  function byId(id) { return CPS.filter(function (c) { return c.id === id; })[0]; }
+
+  var stage = document.getElementById('stage'), cut = document.getElementById('cut'), cmpBody = document.getElementById('cmpBody');
+  /* One side of the comparison. Both layers stretch to the taller page, and
+     each is filled with its own page's ground (sampled from its left edge,
+     halfway down), so where the shorter page ends it visibly ends, instead of
+     the other page showing through. */
+  function layer(cp, p, alt, cls) {
+    var img = stillView(cp, p, width, alt, false, 'min(980px, 100vw)');
+    var box = el('div', { class: 'layer' + (cls ? ' ' + cls : '') }, [img]);
+    img.addEventListener('load', function () {
+      try {
+        var c = document.createElement('canvas'); c.width = 1; c.height = 1;
+        var g = c.getContext('2d');
+        g.drawImage(img, 1, Math.floor(img.naturalHeight / 2), 1, 1, 0, 0, 1, 1);
+        var d = g.getImageData(0, 0, 1, 1).data;
+        box.style.background = 'rgb(' + d[0] + ',' + d[1] + ',' + d[2] + ')';
+      } catch (e) {}
+    });
+    return box;
+  }
+  function renderCompare() {
+    var a = byId(selA.value), b = byId(selB.value), p = selP.value;
+    cmpBody.style.setProperty('--stage-max', width === 'mobile' ? '400px' : '980px');
+    document.getElementById('tagA').textContent = a.date;
+    document.getElementById('tagB').textContent = b.date;
+    stage.textContent = '';
+    var has = function (cp) { return cp.stills.indexOf(p) !== -1; };
+    if (!has(a) || !has(b)) {
+      var missing = [a, b].filter(function (c) { return !has(c); }).map(function (c) { return c.date; }).join(' and ');
+      stage.appendChild(el('p', { class: 'missing', text: PAGES[p] + ' did not exist yet on ' + missing + '. Pick another screen.' }));
+      cut.disabled = true;
+      return;
+    }
+    cut.disabled = false;
+    var inner = el('div', { class: 'inner' }, [
+      layer(a, p, PAGES[p] + ' on ' + a.date + ', full page', ''),
+      layer(b, p, PAGES[p] + ' on ' + b.date + ', full page', 'after'),
+      el('span', { class: 'handle' })
+    ]);
+    inner.style.setProperty('--cut', cut.value + '%');
+    stage.appendChild(inner);
+    stage.scrollTop = 0;
+  }
+  function setCut(v) { var i = stage.querySelector('.inner'); if (i) i.style.setProperty('--cut', v + '%'); }
+  cut.addEventListener('input', function () { setCut(cut.value); });
+  function drag(e) {
+    var r = stage.getBoundingClientRect();
+    var x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
+    cut.value = Math.round(x); setCut(x);
+  }
+  var down = false;
+  stage.addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse' && e.offsetX > stage.clientWidth) return; down = true; drag(e); });
+  window.addEventListener('pointermove', function (e) { if (down) drag(e); });
+  window.addEventListener('pointerup', function () { down = false; });
+  window.addEventListener('pointercancel', function () { down = false; });
+  [selA, selB, selP].forEach(function (s) { s.addEventListener('change', renderCompare); });
+
+  /* the design board stills */
+  var boards = Array.prototype.map.call(document.querySelectorAll('#dirStrip [data-shot]'), function (b) {
+    return { url: b.dataset.shot, cap: b.dataset.cap, natw: 360 };
+  });
+  document.querySelectorAll('#dirStrip [data-shot]').forEach(function (b, i) {
+    b.addEventListener('click', function () { openShot(boards, i); });
+  });
+
+  renderTimeline();
+  renderCompare();
+
+  /* A link to a section (#redesign, #cp-2026-10j). The timeline is drawn by
+     this script, so the browser's own jump came before its target existed.
+     Jump now, before the reveals are armed, and again once fonts and images
+     have settled, unless the reader has started scrolling. */
+  function toHash() {
+    var t = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (t) t.scrollIntoView({ block: 'start' });
+    return !!t;
+  }
+  if (toHash()) {
+    var moved = false;
+    ['wheel', 'touchstart', 'keydown'].forEach(function (ev) { window.addEventListener(ev, function () { moved = true; }, { passive: true, once: true }); });
+    var again = function () { if (!moved) toHash(); };
+    if (document.fonts) document.fonts.ready.then(again);
+    window.addEventListener('load', again);
+  }
+
+  /* chapter bar: current chapter, reading-progress gauge, back to top */
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var chips = document.getElementById('chips');
+  var chipLinks = Array.prototype.slice.call(chips.querySelectorAll('a'));
+  var chapters = chipLinks.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+  var segs = Array.prototype.slice.call(document.querySelectorAll('#pgauge i:not(.p)'));
+  var totop = document.getElementById('totop'), mast = document.querySelector('.mast');
+  var curId = '', ticking = false;
+  function setCurrent(id) {
+    chipLinks.forEach(function (a) {
+      if (a.getAttribute('href') !== '#' + id) { a.removeAttribute('aria-current'); return; }
+      a.setAttribute('aria-current', 'true');
+      var l = a.offsetLeft - chips.offsetLeft, r = l + a.offsetWidth;
+      if (l < chips.scrollLeft || r > chips.scrollLeft + chips.clientWidth) chips.scrollTo({ left: Math.max(0, l - 24), behavior: reduce ? 'auto' : 'smooth' });
+    });
+  }
+  function onScroll() {
+    ticking = false;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var y = window.scrollY, pct = max > 0 ? y / max : 0, lit = Math.round(pct * segs.length);
+    segs.forEach(function (s, i) { s.classList.toggle('on', i < lit); });
+    totop.hidden = y < mast.offsetTop + mast.offsetHeight + 200;
+    var cur = '';
+    chapters.forEach(function (c) { if (c && c.getBoundingClientRect().top <= 130) cur = c.id; });
+    if (max - y < 4 && chapters.length) cur = chapters[chapters.length - 1].id;
+    if (cur !== curId) { curId = cur; setCurrent(cur); }
+  }
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  totop.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); });
+  document.querySelectorAll('.chips a, .years a, .tldr a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var t = document.getElementById(a.getAttribute('href').slice(1));
+      if (!t) return;
+      e.preventDefault();
+      t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    });
+  });
+
+  /* Lively motion. It only hides what is still below the screen, so the page is complete at rest. */
+  var root = document.documentElement;
+  var RV = '.cp, .cyc, .ahead > div, .origin-art figure, .stat, .chart-scroll, .cmp-body, .prose > p, .sg, .practice li, .note-card, .about';
+  var mode = 'lively';
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); play(en.target); } });
+  }, { rootMargin: '0px 0px -10% 0px' }) : null;
+  function lively() { return mode === 'lively' && !!io; }
+  function below(x) { return x.getBoundingClientRect().top > window.innerHeight; }
+  function countUp(n) {
+    if (n.dataset.done) return;
+    n.dataset.done = '1';
+    var to = +n.dataset.count, t0 = 0;
+    function step(t) {
+      if (!t0) t0 = t;
+      var k = Math.min(1, (t - t0) / 900);
+      n.textContent = String(Math.round(to * (1 - Math.pow(1 - k, 3))));
+      if (k < 1 && mode === 'lively') requestAnimationFrame(step); else n.textContent = n.dataset.count;
+    }
+    requestAnimationFrame(step);
+  }
+  function play(t) {
+    t.classList.remove('armed');
+    if (t.matches('.term, .pad')) t.classList.add('play');
+    if (t.dataset.count) countUp(t);
+  }
+  function arm() {
+    if (!lively()) return;
+    document.querySelectorAll(RV).forEach(function (x) {
+      x.classList.add('rv');
+      if (!x.dataset.seen && below(x)) { x.dataset.seen = '1'; x.classList.add('armed'); io.observe(x); }
+    });
+    document.querySelectorAll('.term, .pad, section.chart').forEach(function (x) {
+      if (!x.classList.contains('play') && !x.dataset.seen && below(x)) { x.dataset.seen = '1'; x.classList.add('armed'); io.observe(x); }
+    });
+    document.querySelectorAll('[data-count]').forEach(function (n) {
+      if (!n.dataset.done && below(n)) { n.textContent = '0'; io.observe(n); }
+    });
+  }
+  root.setAttribute('data-mode', 'lively');
+  arm();
+  onScroll();
+})();
+</script>
+</body>
+</html>
