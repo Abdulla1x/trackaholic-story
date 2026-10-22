@@ -191,6 +191,24 @@ select { font: inherit; color: var(--ink); background: var(--field); border: 1.5
 
 /* checkpoints */
 .cp { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 24px; padding: 18px 0 22px; border-bottom: 1px solid var(--rule); }
+/* the timeline: a line down the left that draws as you scroll, a dot per checkpoint that lights when the line
+   reaches it, a pen tip on the line's end, and a branch from the dot to an underline under the date */
+#cps .cp { position: relative; padding-left: 28px; }
+#cps .cp .when > * { justify-self: start; transform-origin: left center; }
+#cps .cp::before { content: ""; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(var(--action), var(--action)) top / 100% calc(var(--rail, 1) * 100%) no-repeat, var(--rule); }
+#cps .cp::after { content: ""; position: absolute; left: 2px; top: 23px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%;
+  background: var(--ground); border: 2px solid var(--rule); transition: background-color .25s ease, border-color .25s ease, transform .35s cubic-bezier(.2,1.6,.4,1); }
+#cps .cp.lit::after { background: var(--action); border-color: var(--action); }
+#cps .cp.rail-armed:not(.lit)::after { transform: scale(.6); }
+#cps .cp .pen { position: absolute; left: 4px; top: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--action); pointer-events: none;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--action) 22%, transparent); opacity: 0; transition: opacity .15s ease;
+  transform: translateY(calc(var(--rail, 0) * var(--cph, 0) * 1px - 4px)); }
+#cps .cp.drawing .pen { opacity: 1; }
+#cps .cp .branch { position: absolute; left: 14px; top: 28px; width: 12px; height: 2px; background: var(--action); transform-origin: left; transform: scaleX(0); transition: transform .2s ease .06s; }
+#cps .cp.shown .branch { transform: none; }
+#cps .cp .date { background: linear-gradient(var(--action), var(--action)) left bottom / 0% 2px no-repeat; padding-bottom: 3px; }
+#cps .cp.shown .date { background-size: 100% 2px; }
 .cp .when { display: grid; gap: 2px; align-content: start; }
 .cp .date { font-size: 20px; font-weight: 760; font-stretch: 80%; }
 .cp .body { display: grid; gap: 10px; min-width: 0; }
@@ -303,6 +321,16 @@ dialog #dlgcap { min-width: 0; overflow-wrap: anywhere; }
   html[data-mode="lively"] .term.armed .tl, html[data-mode="lively"] .pad.armed .pad-page > div { opacity: 0; }
   html[data-mode="lively"] .term.play .tl { opacity: 0; animation: appear .01s steps(1) forwards; animation-delay: calc(var(--i) * 55ms); }
   html[data-mode="lively"] .pad.play .pad-page > div { opacity: 0; animation: write .35s ease forwards; animation-delay: calc(var(--i) * 260ms + 150ms); }
+  /* a checkpoint below the screen waits for the line: the date is stamped, the text slides out from the line, the screenshots come in from the right */
+  html[data-mode="lively"] #cps .cp .when > * { transition: opacity .3s ease .1s, transform .38s cubic-bezier(.2,1.5,.4,1) .1s; }
+  html[data-mode="lively"] #cps .cp .date { transition: background-size .35s ease .3s, opacity .3s ease .1s, transform .38s cubic-bezier(.2,1.5,.4,1) .1s; }
+  html[data-mode="lively"] #cps .cp .body > * { transition: opacity .45s ease .24s, transform .5s cubic-bezier(.2,.8,.2,1) .24s; }
+  html[data-mode="lively"] #cps .cp .body > :nth-child(2) { transition-delay: .3s; }
+  html[data-mode="lively"] #cps .cp .body > :nth-child(n+3) { transition-delay: .36s; }
+  html[data-mode="lively"] #cps .cp .strip .shot { transition: opacity .45s ease, transform .5s cubic-bezier(.2,.8,.2,1); transition-delay: calc(.42s + var(--k, 0) * 55ms); }
+  html[data-mode="lively"] #cps .cp.rail-armed:not(.shown) .when > * { opacity: 0; transform: scale(1.3); }
+  html[data-mode="lively"] #cps .cp.rail-armed:not(.shown) .body > * { opacity: 0; transform: translateX(-16px); }
+  html[data-mode="lively"] #cps .cp.rail-armed:not(.shown) .strip .shot { opacity: 0; transform: translateX(28px); }
   @keyframes appear { to { opacity: 1; } }
   @keyframes write { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
 /* recruiter layer: the 30-second box, under the hood, about me */
@@ -1058,14 +1086,17 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
           btn.style.setProperty('--ar', ar);
           list.push({ view: stillView.bind(null, cp, p, width, name + ' · ' + cp.date, false, 'min(1280px, 96vw)'), cap: name + ' · ' + cp.date, natw: natw });
           btn.addEventListener('click', function () { openShot(list, i); });
-          media.appendChild(el('figure', { class: 'shot' }, [btn, el('figcaption', { text: name })]));
+          var fig = el('figure', { class: 'shot' }, [btn, el('figcaption', { text: name })]);
+          fig.style.setProperty('--k', Math.min(media.children.length, 8));
+          media.appendChild(fig);
         });
       }
       var body = el('div', { class: 'body' + (cp.wide || width === 'desktop' ? ' wide' : '') }, [
         el('h3', { text: cp.title }), el('p', { class: 'note', text: cp.note }), media, cp.looks ? lookBlock(cp) : null, cp.src ? el('p', { class: 'src', text: cp.src }) : null
       ]);
       host.appendChild(el('article', { class: 'cp', id: 'cp-' + cp.id }, [
-        el('div', { class: 'when' }, [el('span', { class: 'lbl', text: 'Checkpoint' }), el('span', { class: 'date num', text: cp.date })]), body
+        el('div', { class: 'when' }, [el('span', { class: 'lbl', text: 'Checkpoint' }), el('span', { class: 'date num', text: cp.date })]), body,
+        el('span', { class: 'pen', 'aria-hidden': 'true' }), el('span', { class: 'branch', 'aria-hidden': 'true' })
       ]));
     });
     SOON.forEach(function (s) {
@@ -1247,6 +1278,19 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     chapters.forEach(function (c) { if (c && c.getBoundingClientRect().top <= 130) cur = c.id; });
     if (max - y < 4 && chapters.length) cur = chapters[chapters.length - 1].id;
     if (cur !== curId) { curId = cur; setCurrent(cur); }
+    rail();
+  }
+  /* The line reaches a checkpoint when the checkpoint's top passes 62% of the way down the screen. */
+  function rail() {
+    var line = window.innerHeight * 0.62;
+    document.querySelectorAll('#cps .cp').forEach(function (c) {
+      var r = c.getBoundingClientRect(), k = Math.max(0, Math.min(1, (line - r.top) / r.height)), lit = r.top + 28 < line;
+      c.style.setProperty('--rail', k.toFixed(3));
+      c.style.setProperty('--cph', Math.round(r.height));
+      c.classList.toggle('drawing', k > 0.01 && k < 0.99);
+      c.classList.toggle('lit', lit);
+      if (lit) c.classList.add('shown');
+    });
   }
   window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
   window.addEventListener('resize', onScroll);
@@ -1262,7 +1306,7 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
 
   /* Lively motion. It only hides what is still below the screen, so the page is complete at rest. */
   var root = document.documentElement;
-  var RV = '.cp, .cyc, .ahead > div, .origin-art figure, .stat, .chart-scroll, .cmp-body, .prose > p, .sg, .practice li, .note-card, .about';
+  var RV = '.cyc, .ahead > div, .origin-art figure, .stat, .chart-scroll, .cmp-body, .prose > p, .sg, .practice li, .note-card, .about';
   var mode = 'lively';
   var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
     entries.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); play(en.target); } });
@@ -1325,6 +1369,12 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     document.querySelectorAll('[data-count]').forEach(function (n) {
       if (!n.dataset.done && below(n)) { n.textContent = '0'; io.observe(n); }
     });
+    var line = window.innerHeight * 0.62;
+    document.querySelectorAll('#cps .cp').forEach(function (c) {
+      c.classList.remove('lit', 'shown');
+      c.classList.toggle('rail-armed', c.getBoundingClientRect().top + 28 > line);
+    });
+    rail();
   }
   root.setAttribute('data-mode', 'lively');
   arm();
