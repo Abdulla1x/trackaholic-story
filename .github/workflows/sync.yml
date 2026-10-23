@@ -1,7 +1,7 @@
 name: Sync with Trackaholic
 
 # Trackaholic's notify-story workflow sends trackaholic-merged after every push to its main.
-# The numbers arrive as a pull request to merge.
+# The numbers arrive as a pull request to merge; story content is only flagged, in an issue.
 on:
   repository_dispatch:
     types: [trackaholic-merged]
@@ -38,6 +38,9 @@ jobs:
           cache-dependency-path: .app/backend/requirements-dev.txt
 
       - run: pip install -r .app/backend/requirements-dev.txt
+
+      - name: Flag story content
+        run: python scripts/stale_check.py
 
       - name: Start from the open recount, or from main
         run: |

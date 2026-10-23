@@ -1,0 +1,14 @@
+{
+  "seed_through": 206,
+  "cards": {
+    "Training, next to nutrition": ["workout", "training", "exercise", "lift"],
+    "A front door": ["landing", "demo", "front door", "app store"],
+    "Fast from the first tap": ["cold start", "keep-warm", "keep warm", "speed", "performance", "faster", "instant"],
+    "AI I can stand behind": ["evaluation", "model", "accuracy", "benchmark", "gemini"],
+    "Good at the food I eat": ["food table", "salan", "roti", "khubz", "south asian", "gulf"]
+  },
+  "pending": {
+    "Results pending": "Clears when the AI model evaluation finishes: add the findings, link the write-up, put \"benchmark\" back on the AI card.",
+    "Case study coming": "Clears when the design case study is published: link it from the entry."
+  }
+}
