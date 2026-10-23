@@ -1219,6 +1219,8 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     });
     var clear = function () { frameList().forEach(function (f) { f[1].style.viewTransitionName = ''; }); };
     t.finished.then(clear, clear);
+    /* Chrome sometimes skips the cross-fade ("invalid state"); the switch itself has already happened by then */
+    t.ready.catch(function () {});
   }
 
   /* the design board stills */
