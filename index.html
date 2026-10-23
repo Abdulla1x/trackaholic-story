@@ -681,7 +681,7 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
         <p class="learned">Measure before fixing. The slow start-up took four wrong guesses before the data pointed at the real cause.</p>
       </article>
       <article class="cyc">
-        <div class="k"><span class="lbl num">Mid-Sep – Oct 21</span><span class="lbl">The overhaul</span></div>
+        <div class="k"><span class="lbl num">Mid-Sep – Oct 22</span><span class="lbl">The overhaul</span></div>
         <h3>A redesign, done in steps</h3>
         <ul>
           <li><b>·</b><span>Two weeks of research, and an audit with 24 findings</span></li>
@@ -695,7 +695,7 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
           <li><b>3a</b><span>Settings became one You page</span></li>
           <li><b>3b–4</b><span>Every look in light and dark, fewer words, then a polish pass</span></li>
           <li><b>5</b><span>Shipped to everyone on 17 October</span></li>
-          <li><b>·</b><span>Then its own address, password reset by email, a privacy page and Sign in with Google</span></li>
+          <li><b>·</b><span>Then its own address, password reset by email, a privacy page, Sign in with Google and Add to home screen</span></li>
         </ul>
         <p class="learned">Prototype first. Clicking through a look decides it faster than any mock-up I could describe. <a href="#redesign">The full story is below ↓</a></p>
       </article>
@@ -902,7 +902,12 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
       note: 'Live for everyone on 17 October, after a final check of every screen at both widths and on my phone. The whole redesign went out in one release: Today, Progress and You with Log in the middle, light and dark in nine colours plus Label, shorter words, and the polish. Existing accounts kept every meal and setting, and were asked once which trackers to keep. The first fixes from using it on my phone went out the same day: a refusal for a protein number that cannot fit now says it in one line, the weekly review rounds its averages once, meal names line up whether or not a time sits beside them, and a screen title that does not fit wraps instead of being cut off.',
       src: 'Captured 2026-10-17 from main, the release plus the same day\'s fixes', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy', 'first-use', 'setup', 'setup-target', 'how-it-works', 'target-sum', 'you-targets', 'you-water', 'you-supplements', 'you-library', 'you-delete', 'appearance', 'appearance-dark', 'appearance-label', 'log-meal-dark', 'log-meal-label', 'sign-in-dark', 'sign-in-label', 'log-hint', 'review-new']),
       names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy', 'first-use': 'A new account', setup: 'Setup, one question', 'setup-target': 'Setup, the target', 'how-it-works': 'How it works', 'target-sum': 'How the target is worked out', settings: 'You', 'you-targets': 'Daily targets, my own protein', 'you-water': 'Water', 'you-supplements': 'A supplement, in a sheet', 'you-library': 'A food, in a sheet', 'you-delete': 'Delete account', appearance: 'Appearance', 'appearance-dark': 'Appearance, dark', 'appearance-label': 'Appearance, Label', 'log-meal-dark': 'Log panel, dark', 'log-meal-label': 'Log panel, Label', 'sign-in-dark': 'Log in, dark', 'sign-in-label': 'Log in, Label', 'log-hint': 'Log panel, a tip', 'review-new': 'The review, a new account' },
-      clips: ['tour', 'ai-logging', 'settings', 'weight', 'first-use', 'appearance'] }
+      clips: ['tour', 'ai-logging', 'settings', 'weight', 'first-use', 'appearance'] },
+    { id: '2026-10k', date: '2026-10-22', title: 'Sign in with Google, and a home screen app',
+      note: 'Three things in the week after the release. Log in and Sign up gained Continue with Google, drawn in the app\'s own field style under the email form. An account that already uses the same address, verified by Google, is linked rather than duplicated, and its password keeps working. A privacy page, linked from both forms, says what the app stores, where it goes, and how to get it back or delete it. And a phone browser now offers to add Trackaholic to the home screen once a target is set and the first meal is logged: an Install button where the browser has one, otherwise the taps drawn out, as on the iPhone here. "Not now" asks once more a week later, then never, and You keeps the option for any time. Two fixes rode along: holding a date arrow no longer restarts the server and signs you out, and clicking the date opens the calendar.',
+      src: 'Captured 2026-10-23 from main', stills: EIGHT.concat(['day', 'meal', 'days', 'accuracy', 'first-use', 'setup', 'setup-target', 'how-it-works', 'target-sum', 'you-targets', 'you-water', 'you-supplements', 'you-library', 'you-delete', 'appearance', 'appearance-dark', 'appearance-label', 'log-meal-dark', 'log-meal-label', 'sign-in', 'sign-in-dark', 'sign-in-label', 'sign-up', 'privacy', 'install', 'log-hint', 'review-new']),
+      mobileOnly: ['install'],
+      names: { 'log-meal': 'Log panel', 'ai-applied': 'Check and edit', day: 'Day in detail', meal: 'One meal', analytics: 'Progress', weight: 'All weigh-ins', days: 'Daily totals', accuracy: 'AI accuracy', 'first-use': 'A new account', setup: 'Setup, one question', 'setup-target': 'Setup, the target', 'how-it-works': 'How it works', 'target-sum': 'How the target is worked out', settings: 'You', 'you-targets': 'Daily targets, my own protein', 'you-water': 'Water', 'you-supplements': 'A supplement, in a sheet', 'you-library': 'A food, in a sheet', 'you-delete': 'Delete account', appearance: 'Appearance', 'appearance-dark': 'Appearance, dark', 'appearance-label': 'Appearance, Label', 'log-meal-dark': 'Log panel, dark', 'log-meal-label': 'Log panel, Label', 'sign-in': 'Log in', 'sign-in-dark': 'Log in, dark', 'sign-in-label': 'Log in, Label', 'sign-up': 'Sign up', privacy: 'Privacy', install: 'Add to home screen, iPhone', 'log-hint': 'Log panel, a tip', 'review-new': 'The review, a new account' } }
   ];
   var SOON = [];
 
@@ -1183,7 +1188,9 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
         var ar = cp.wide ? '16 / 9' : (width === 'mobile' ? '390 / 844' : '1280 / 832');
         var natw = cp.wide || width === 'desktop' ? 1280 : 390;
         var list = [];
-        cp.stills.forEach(function (p, i) {
+        /* Some screens only exist on a phone (the Add to home screen popup),
+           so a checkpoint can name stills that have no desktop capture. */
+        cp.stills.filter(function (p) { return width === 'mobile' || (cp.mobileOnly || []).indexOf(p) === -1; }).forEach(function (p, i) {
           var name = (cp.names && cp.names[p]) || PAGES[p] || p;
           var img = stillView(cp, p, width, name + ', ' + cp.date, true);
           var btn = el('button', { type: 'button', 'aria-label': 'Open the full ' + name + ' page' }, [img, el('span', { class: 'fp', text: 'Full page' })]);
