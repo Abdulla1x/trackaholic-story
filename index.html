@@ -35,12 +35,11 @@ img { max-width: 100%; }
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Libre+Franklin:wght@400;800;900&family=Mona+Sans:wdth,wght@75..125,400..900&display=swap">
 <style>
 /* Layout: the app's own "data page" look. A story told down one column of dated
-   rows: the notepad, the terminal, the commit record, then every screen, then
+   rows: my phone notes, the terminal, the commit record, then every screen, then
    the planning cycles and what comes next. */
 :root {
   --ground: #e4e7e1; --field: #eef0eb; --ink: #0f1210; --ink-2: #485049;
   --rule: #c3c9c1; --track: #cfd4cc; --action: #1747e0; --action-ink: #ffffff; --plan: #8c1d8c;
-  --paper: #fbf8ec; --paper-ink: #233a8a; --paper-rule: #b9cde6; --paper-margin: #e59a9a;
   --term-bg: #111512; --term-ink: #d6dfd5; --term-dim: #8a958b; --term-in: #9cc8ff; --term-edge: #2a312b;
   --font: "Mona Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --label-font: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
@@ -52,7 +51,6 @@ img { max-width: 100%; }
   :root:not([data-theme="light"]) {
     --ground: #0b0e0c; --field: #141815; --ink: #e7ebe4; --ink-2: #9ba49c;
     --rule: #283029; --track: #232924; --action: #7d9bff; --action-ink: #0b0e0c; --plan: #e88ae8;
-    --paper: #d9d5c6; --paper-ink: #1f3478; --paper-rule: #a3b5cc; --paper-margin: #c47f7f;
     --term-bg: #050706; --term-edge: #283029;
     color-scheme: dark;
   }
@@ -60,7 +58,6 @@ img { max-width: 100%; }
 :root[data-theme="dark"] {
   --ground: #0b0e0c; --field: #141815; --ink: #e7ebe4; --ink-2: #9ba49c;
   --rule: #283029; --track: #232924; --action: #7d9bff; --action-ink: #0b0e0c; --plan: #e88ae8;
-  --paper: #d9d5c6; --paper-ink: #1f3478; --paper-rule: #a3b5cc; --paper-margin: #c47f7f;
   --term-bg: #050706; --term-edge: #283029;
   color-scheme: dark;
 }
@@ -97,23 +94,17 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .fields .v small { font-size: 14px; font-weight: 600; font-stretch: 100%; color: var(--ink-2); margin-left: 3px; }
 @media (max-width: 720px) { .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fields .f:nth-child(3) { border-left: 0; padding-left: 0; } .fields .f:nth-child(n+3) { border-top: 1px solid var(--rule); } }
 
-/* origin: prose beside a notepad page and the first script */
+/* origin: prose beside my real phone notes and the first script */
 .origin { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px 40px; align-items: start; }
 @media (max-width: 860px) { .origin { grid-template-columns: minmax(0, 1fr); } }
 .origin-art { display: grid; gap: 18px; min-width: 0; }
-.pad { margin: 0; display: grid; gap: 6px; }
-.pad-page { position: relative; background-color: var(--paper); color: var(--paper-ink); font-family: var(--hand); font-size: 17px; line-height: 30px;
-  padding: 34px 18px 18px 58px; border-radius: 2px; transform: rotate(-0.6deg);
-  background-image: linear-gradient(90deg, transparent 44px, var(--paper-margin) 44px, var(--paper-margin) 45.5px, transparent 45.5px),
-                    repeating-linear-gradient(180deg, transparent 0 29px, var(--paper-rule) 29px 30px);
-  background-position: 0 0, 0 4px; box-shadow: 0 1px 0 var(--rule), 0 8px 20px -14px rgba(0,0,0,.45); }
-.pad-page .holes { position: absolute; left: 14px; top: 26px; bottom: 20px; display: grid; align-content: space-between; }
-.pad-page .holes i { width: 12px; height: 12px; border-radius: 50%; background: var(--ground); display: block; }
-.pad-page .day { font-weight: 700; }
-.pad-page .ln { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.pad-page .sum { color: var(--ink-2); }
-.pad-page .tot { font-weight: 700; border-top: 1.5px solid var(--paper-ink); margin-top: 2px; }
-.pad figcaption, .code figcaption, .term figcaption { font-size: 13px; color: var(--ink-2); }
+.phone-notes { margin: 0; display: grid; gap: 6px; }
+.pn-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.pn { display: grid; gap: 6px; min-width: 0; }
+.phone-notes.todo .pn { max-width: 260px; }
+.pn button { display: block; width: 100%; padding: 0; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: #000; cursor: zoom-in; }
+.pn img { display: block; width: 100%; height: auto; }
+.phone-notes figcaption, .code figcaption, .term figcaption { font-size: 13px; color: var(--ink-2); }
 .stat { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 .stat .v { font-size: 40px; font-weight: 780; font-stretch: 78%; line-height: 1; grid-row: span 2; }
 .stat .t { font-weight: 650; }
@@ -318,9 +309,8 @@ dialog #dlgcap { min-width: 0; overflow-wrap: anywhere; }
   html[data-mode="lively"] .chart.armed .val, html[data-mode="lively"] .chart.armed .eras span, .chart .val.off, .chart .eras span.off { opacity: 0; }
   .chart .eras span.off { transform: translateY(4px); }
   .snap, .snap * { transition: none !important; }
-  html[data-mode="lively"] .term.armed .tl, html[data-mode="lively"] .pad.armed .pad-page > div { opacity: 0; }
+  html[data-mode="lively"] .term.armed .tl { opacity: 0; }
   html[data-mode="lively"] .term.play .tl { opacity: 0; animation: appear .01s steps(1) forwards; animation-delay: calc(var(--i) * 55ms); }
-  html[data-mode="lively"] .pad.play .pad-page > div { opacity: 0; animation: write .35s ease forwards; animation-delay: calc(var(--i) * 260ms + 150ms); }
   /* a checkpoint below the screen waits for the line: the date is stamped, the text slides out from the line, the screenshots come in from the right */
   html[data-mode="lively"] #cps .cp .when > * { transition: opacity .3s ease .1s, transform .38s cubic-bezier(.2,1.5,.4,1) .1s; }
   html[data-mode="lively"] #cps .cp .date { transition: background-size .35s ease .3s, opacity .3s ease .1s, transform .38s cubic-bezier(.2,1.5,.4,1) .1s; }
@@ -340,7 +330,6 @@ dialog #dlgcap { min-width: 0; overflow-wrap: anywhere; }
   .gauge.flying { pointer-events: none; }
   .gauge.flying i { transition: background-color .45s ease; }
   @keyframes appear { to { opacity: 1; } }
-  @keyframes write { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
 /* recruiter layer: the 30-second box, under the hood, about me */
 .tldr { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px 32px; align-items: center; background: var(--field); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
 @media (max-width: 760px) { .tldr { grid-template-columns: minmax(0, 1fr); } }
@@ -385,7 +374,7 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
       <div class="gauge" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="p"></i></div>
       <div class="serving"><span>Serving size</span><b>2 years, 1 habit</b></div>
     </div>
-    <p class="lede">I used to track my food with a calculator and a notepad. In July 2024 I wrote nine lines of Python to do the sums for me. Two years later that script is Trackaholic, an installable app with accounts, AI meal logging and a redesign that shipped in October 2026. This page shows how it got here, one version at a time. Every app screen uses made-up demo data.</p>
+    <p class="lede">I used to track my food with my phone's calculator and a notes app. In July 2024 I wrote nine lines of Python to do the sums for me. Two years later that script is Trackaholic, an installable app with accounts, AI meal logging and a redesign that shipped in October 2026. This page shows how it got here, one version at a time. Every app screen uses made-up demo data.</p>
   </header>
 
   <section class="fields" aria-label="Facts">
@@ -416,32 +405,28 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
   </nav>
 
   <section class="sec" id="origin" aria-labelledby="origin-title">
-    <div class="sec-head"><h2 id="origin-title">How it started</h2><span class="lbl">Before 2024 → July 2024</span></div>
-    <p class="quip">Serving size: one notepad page.</p>
+    <div class="sec-head"><h2 id="origin-title">How it started</h2><span class="lbl">July 2024</span></div>
+    <p class="quip">Serving size: one note a day.</p>
     <div class="origin">
       <div class="prose">
-        <p>Before there was any code, tracking meant a kitchen scale, a calculator and a notepad. I weighed the food, read the label, worked out weight divided by serving size times calories, and wrote the answer down. At the end of the day I added up the page.</p>
-        <p>It worked, but every meal meant the same sums again, and a notepad can't tell you anything about last week. I was learning Python, so on 16 July 2024 I wrote a script that did the one sum I kept repeating. Ten days later it could add up a meal with several ingredients and save it under a date.</p>
-        <p>I used it every day that summer. The logs from those weeks are still in the repository.</p>
+        <p>When I started tracking in July 2024, it meant a kitchen scale, my phone's calculator and a notes app. I weighed the food, read the label, worked out weight divided by serving size times calories on the calculator, and typed the answer into that day's note. At the end of the day I added it up.</p>
+        <p>It worked, but every meal meant the same sums again, and a notes app can't tell you anything about last week. I was learning Python, so on 16 July 2024 I wrote a script that did the one sum I kept repeating. Ten days later it could add up a meal with several ingredients and save it under a date.</p>
+        <p>I used it every day that summer, and I still have the logs from those weeks.</p>
         <div class="stat">
           <span class="v num" data-count="159">159</span>
           <span class="t">meals logged over 28 days</span>
           <span class="s num">15 July to 11 August 2024, through the first terminal version</span>
         </div>
+        <p>On 24 July I wrote the script its first to-do list: saved foods with their macros, meals stored by date, edit and delete, macros looked up online, and catching bad input. Storing meals by date was done that same day, and most of the list is in the app today.</p>
         <p class="quiet">Every version since has been the same idea with more of what I'd learned by then: a menu, then a web page, then a real app with accounts, AI estimates and a phone layout.</p>
       </div>
       <div class="origin-art">
-        <figure class="pad">
-          <div class="pad-page" role="img" aria-label="Illustration of a notepad page: four foods with weights, the calories and protein worked out by hand, and a daily total of 1,098 kcal and 96 g protein.">
-            <span class="holes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-            <div class="day" style="--i:0">Mon 15 July</div>
-            <div class="ln" style="--i:1"><span>Oats 80g</span><span class="sum">80/40 × 150 = 300 kcal · 10 P</span></div>
-            <div class="ln" style="--i:2"><span>Eggs ×3</span><span class="sum">3 × 78 = 234 kcal · 19 P</span></div>
-            <div class="ln" style="--i:3"><span>Chicken 200g</span><span class="sum">2 × 165 = 330 kcal · 62 P</span></div>
-            <div class="ln" style="--i:4"><span>Rice 180g</span><span class="sum">1.8 × 130 = 234 kcal · 4.9 P</span></div>
-            <div class="ln tot" style="--i:5"><span>Total</span><span>1098 kcal · 96 P</span></div>
+        <figure class="phone-notes">
+          <div class="pn-pair">
+            <div class="pn"><span class="lbl">15 July 2024</span><button type="button" data-shot="media/origin/notes-15jul.webp" data-cap="15 July 2024: the day's meals and total" aria-label="Open my note for 15 July 2024"><img src="media/origin/notes-15jul.webp" width="720" height="797" alt="My phone note for 15 July 2024: oats 445 cal, eggs 279, tea 100, a smoothie 201, apricots 48, peaches 40, a banana 100.6 and chicken and rice 668, each with its protein, and a total of 1,882 cal and 93 g protein."></button></div>
+            <div class="pn"><span class="lbl">25 July 2024</span><button type="button" data-shot="media/origin/notes-25jul.webp" data-cap="25 July 2024: each meal worked out, then the total" aria-label="Open my note for 25 July 2024"><img src="media/origin/notes-25jul.webp" width="720" height="1205" alt="My phone note for 25 July 2024: peanut butter, jam, four slices of bread and two fried eggs worked out to 790 cal and 32.3 g protein, then paratha with chickpeas, a workout drink, a protein shake and nuggets, for a total of 1,677 cal and 90 g protein."></button></div>
           </div>
-          <figcaption>Illustration of the notepad routine, not a scan of a real page.</figcaption>
+          <figcaption>My real notes from July 2024, on my phone. Open one to read it at full size.</figcaption>
         </figure>
         <figure class="code">
 <pre><span class="dim"># macros calculator.py, 16 July 2024, commit 8c275f4</span>
@@ -454,7 +439,11 @@ total_calories = weight/serving_size*calories
 total_protein = weight/serving_size*protein
 
 print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
-          <figcaption>The whole first version. The same sum as the notepad, done for me.</figcaption>
+          <figcaption>The whole first version. The same sum I'd been doing on my phone's calculator, done for me.</figcaption>
+        </figure>
+        <figure class="phone-notes todo">
+          <div class="pn"><span class="lbl">24 July 2024</span><button type="button" data-shot="media/origin/todo-24jul.webp" data-cap="24 July 2024: the first to-do list" aria-label="Open my to-do list from 24 July 2024"><img src="media/origin/todo-24jul.webp" width="720" height="1097" alt="My phone note &quot;To do list for personal project&quot;, 24 July 2024: a dictionary of saved foods with add, update and delete; a date dictionary that stores the meals (ticked); a loop with a menu; update and delete functions; a web search for macros data; and input handling for zero division and bad input." loading="lazy"></button></div>
+          <figcaption>The first to-do list. The ticked item was done that day.</figcaption>
         </figure>
       </div>
     </div>
@@ -1240,6 +1229,11 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
     b.addEventListener('click', function () { openShot(boards, i); });
   });
 
+  /* my July 2024 phone notes, opened at full size */
+  var noteBtns = document.querySelectorAll('.phone-notes [data-shot]');
+  var noteShots = Array.prototype.map.call(noteBtns, function (b) { return { url: b.dataset.shot, cap: b.dataset.cap, natw: 480 }; });
+  noteBtns.forEach(function (b, i) { b.addEventListener('click', function () { openShot(noteShots, i); }); });
+
   renderTimeline();
   renderCompare();
 
@@ -1363,7 +1357,7 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
   function play(t) {
     if (t === chartSec) { chartRun(); return; }
     t.classList.remove('armed');
-    if (t.matches('.term, .pad')) t.classList.add('play');
+    if (t.matches('.term')) t.classList.add('play');
     if (t.dataset.count) countUp(t);
   }
   function arm() {
@@ -1372,7 +1366,7 @@ print("Calories: ", total_calories, "\n Protein: ", total_protein)</pre>
       x.classList.add('rv');
       if (!x.dataset.seen && below(x)) { x.dataset.seen = '1'; x.classList.add('armed'); io.observe(x); }
     });
-    document.querySelectorAll('.term, .pad, section.chart').forEach(function (x) {
+    document.querySelectorAll('.term, section.chart').forEach(function (x) {
       if (!x.classList.contains('play') && !x.dataset.seen && below(x)) { x.dataset.seen = '1'; x.classList.add('armed'); io.observe(x); if (x === chartSec) setTot(0, 0); }
     });
     document.querySelectorAll('[data-count]').forEach(function (n) {
