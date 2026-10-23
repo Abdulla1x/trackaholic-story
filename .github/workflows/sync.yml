@@ -1,0 +1,88 @@
+name: Sync with Trackaholic
+
+# Trackaholic's notify-story workflow sends trackaholic-merged after every push to its main.
+# The numbers arrive as a pull request to merge.
+on:
+  repository_dispatch:
+    types: [trackaholic-merged]
+  workflow_dispatch:
+
+concurrency:
+  group: story-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BRANCH: bot/recount
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone Trackaholic
+        # Full commit history without the blobs of old files.
+        run: git clone --filter=blob:none https://github.com/Abdulla1x/Trackaholic.git .app
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: .app/backend/requirements-dev.txt
+
+      - run: pip install -r .app/backend/requirements-dev.txt
+
+      - name: Start from the open recount, or from main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          pr=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$pr" ]; then
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+            if ! git merge --no-edit origin/main; then
+              git merge --abort
+              gh pr close "$pr" --delete-branch --comment 'Superseded: main changed the same lines, so the recount starts again from main.'
+              pr=''
+              git checkout -B "$BRANCH" origin/main
+            fi
+          else
+            # A leftover branch from a merged or closed recount would refuse the push.
+            if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null; then git push origin --delete "$BRANCH"; fi
+            git checkout -B "$BRANCH" origin/main
+          fi
+          echo "PR=$pr" >> "$GITHUB_ENV"
+
+      - name: Recount
+        run: python scripts/sync_numbers.py --trackaholic .app --summary "$RUNNER_TEMP/summary.md"
+
+      - name: Open or update the pull request
+        run: |
+          if git diff --quiet index.html; then
+            # Still push an open recount, to carry the merge from main if there was one.
+            if [ -n "$PR" ]; then git push origin "$BRANCH"; fi
+            echo 'Numbers are current.'
+            exit 0
+          fi
+          git add index.html
+          git commit -m 'Recount commits, pull requests and tests'
+          git push origin "$BRANCH"
+          if [ -n "$PR" ]; then
+            { echo 'Recounted again after another merge:'; echo; cat "$RUNNER_TEMP/summary.md"; } > "$RUNNER_TEMP/body.md"
+            gh pr comment "$PR" --body-file "$RUNNER_TEMP/body.md"
+          else
+            {
+              echo 'Recounted from Trackaholic after a merge there. Only numbers change.'
+              echo
+              cat "$RUNNER_TEMP/summary.md"
+              echo
+              echo 'Merge to publish; GitHub Pages redeploys the page.'
+            } > "$RUNNER_TEMP/body.md"
+            gh pr create --base main --head "$BRANCH" --title 'Recount commits, pull requests and tests' --body-file "$RUNNER_TEMP/body.md"
+          fi
