@@ -414,6 +414,7 @@ dialog #dlgcap { min-width: 0; overflow-wrap: anywhere; }
 .btn:hover { background: var(--ground); }
 .btn.pri { background: var(--action); border-color: var(--action); color: var(--action-ink); }
 .tldr-note { flex-basis: 100%; font-size: 12.5px; color: var(--ink-2); }
+.tldr-note a { color: var(--action); font-weight: 650; }
 .build { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px 40px; align-items: start; }
 @media (max-width: 860px) { .build { grid-template-columns: minmax(0, 1fr); } }
 .stack { display: grid; gap: 14px; }
@@ -463,10 +464,10 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
       <p>Trackaholic is a nutrition tracker. Describe a meal, say it out loud or snap a photo, and an AI estimate fills in the calories and macros, with weight trends, water, steps, supplements and a weekly review around it. I designed, planned and shipped it, growing it from a nine-line terminal script in 2024 into a live, installable web app with accounts and a phone layout.</p>
     </div>
     <div class="tldr-links">
-      <a class="btn pri" href="https://trackaholic.app" target="_blank" rel="noopener">Try the live app</a>
+      <a class="btn pri" href="https://trackaholic.app/demo" target="_blank" rel="noopener">Try the demo</a>
       <a class="btn" href="https://github.com/Abdulla1x/Trackaholic" target="_blank" rel="noopener">Code on GitHub</a>
       <a class="btn" href="#build">Engineering notes</a>
-      <p class="tldr-note">Free hosting, so the first load can take up to a minute, and you'll need to sign up.</p>
+      <p class="tldr-note">No sign-up: the demo opens a month of made-up data, deleted after 24 hours. Free hosting, so the first load can take up to a minute. To keep your own log, <a href="https://trackaholic.app" target="_blank" rel="noopener">sign up on the live app</a>.</p>
     </div>
   </section>
 
