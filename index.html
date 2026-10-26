@@ -139,10 +139,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #origin .tape-g { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; height: 9px; }
 #origin .tape-g i { background: var(--ink); transition: background-color .2s ease; }
 #origin .tape-g i.off { background: var(--track); }
-#origin .tape-check { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink-2); border-top: 1px solid var(--ink); padding-top: 4px; }
+#origin .tape-check { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13.5px; color: var(--ink-2); border-top: 1px solid var(--ink); padding-top: 4px; }
 #origin .tape-check b { color: var(--ink); }
 #origin .stamp { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--action); border: 1.5px solid var(--action);
-  border-radius: 4px; padding: 1px 6px; transform: rotate(-2deg); transition: opacity .25s ease, transform .4s cubic-bezier(.16,1,.3,1); white-space: nowrap; }
+  border-radius: 4px; padding: 1px 6px; transform: rotate(-2deg); transform-origin: right center; transition: opacity .25s ease, transform .4s cubic-bezier(.16,1,.3,1); white-space: nowrap; }
 #origin .code .sum-l { background: linear-gradient(color-mix(in srgb, var(--action) 45%, transparent), color-mix(in srgb, var(--action) 45%, transparent)) left / 0% 100% no-repeat; transition: background-size .5s cubic-bezier(.16,1,.3,1); }
 #origin .code.hl .sum-l, #origin .code:not(.typing):not(.armed) .sum-l { background-size: 100% 100%; }
 #origin .tn { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--ink); }
