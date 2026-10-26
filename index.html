@@ -682,7 +682,7 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
         <p class="learned">Measure before fixing. The slow start-up took four wrong guesses before the data pointed at the real cause.</p>
       </article>
       <article class="cyc">
-        <div class="k"><span class="lbl num">Mid-Sep – Oct 22</span><span class="lbl">The overhaul</span></div>
+        <div class="k"><span class="lbl num">Mid-Sep – Oct 25</span><span class="lbl">The overhaul</span></div>
         <h3>A redesign, done in steps</h3>
         <ul>
           <li><b>·</b><span>Two weeks of research, and an audit with 24 findings</span></li>
@@ -697,6 +697,7 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
           <li><b>3b–4</b><span>Every look in light and dark, fewer words, then a polish pass</span></li>
           <li><b>5</b><span>Shipped to everyone on 17 October</span></li>
           <li><b>·</b><span>Then its own address, password reset by email, a privacy page, Sign in with Google and Add to home screen</span></li>
+          <li><b>·</b><span>Then a demo with no sign-up, and a lighter AI for days the main one runs out</span></li>
         </ul>
         <p class="learned">Prototype first. Clicking through a look decides it faster than any mock-up I could describe. <a href="#redesign">The full story is below ↓</a></p>
       </article>
@@ -745,10 +746,10 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
         </div>
       </article>
       <article class="cp">
-        <div class="when"><span class="lbl">Running</span><span class="date">Since 5 Oct</span></div>
+        <div class="when"><span class="lbl">About 3 weeks</span><span class="date">5 Oct – 24 Oct</span></div>
         <div class="body">
-          <div class="h-row"><h3>Choosing the AI model</h3><span class="pend">Results pending</span></div>
-          <p class="note">The Gemini model the app relies on is being phased out, so I want to choose its replacement on evidence, not on a release note. I'm testing four newer models on the same reference meals, whose real values I know. The runs happen every day on a small home server, and I wrote down how the results would be scored before any came in. The write-up, with what I found, follows when the runs finish.</p>
+          <div class="h-row"><h3>Choosing the AI model</h3><span class="pend">Write-up coming</span></div>
+          <p class="note">The Gemini model the app relies on is being phased out, so I wanted to choose its replacement on evidence, not on a release note. I tested the newer models on the same reference meals, whose real values I know, in daily runs on a small home server, with the scoring rules written down before any result came in. The runs finished on 24 October. The two main candidates came out level on accuracy, so the faster one stays, and when the main AI is used up for the day the app now offers a lighter one. The write-up, with everything I found, comes next.</p>
         </div>
       </article>
     </div>
@@ -777,7 +778,7 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
     <div class="notes">
       <a class="note-card" href="https://github.com/Abdulla1x/Trackaholic/blob/main/docs/incident-2026-07-gemini-eea-region.md" target="_blank" rel="noopener"><span class="lbl">Post-mortem</span><b>AI meal analysis down for three days</b><span>Six hypotheses ruled out before the real cause: the AI provider's free tier was blocked in the region the server ran in. The diagnosis, the move, and the two failures the move caused.</span></a>
       <a class="note-card" href="https://github.com/Abdulla1x/Trackaholic/blob/main/docs/photo-size-ab-2026-10.md" target="_blank" rel="noopener"><span class="lbl">Experiment</span><b>Picking a photo size with an A/B instead of a hunch</b><span>Shrinking photos to 1024 px looked obvious. Measured against the model's own run-to-run noise, it pushed estimates up, so 1536 px shipped instead.</span></a>
-      <div class="note-card"><span class="lbl">Running</span><b>Choosing the next AI model</b><span>Four models, the same reference meals, and the scoring rules written before any results.</span><span class="pend">Results pending</span></div>
+      <div class="note-card"><span class="lbl">Finished</span><b>Choosing the next AI model</b><span>Three weeks of daily runs on the same reference meals, with the scoring rules written before any results.</span><span class="pend">Write-up coming</span></div>
     </div>
   </section>
 
@@ -786,7 +787,7 @@ a.note-card b::after { content: " ↗"; color: var(--action); }
     <p class="quip">The tracking continues.</p>
     <div class="ahead">
       <div><h3>Training, next to nutrition</h3><p>A workout tracker that's easy to pick up: log sets, reps and weights, and see your progressive overload over time. It lives in the same app, with today's workout beside today's meals and strength trends in Progress next to weight and food. It's the biggest addition planned after the redesign.</p></div>
-      <div><h3>A front door</h3><p>A landing page that opens instantly and a demo account full of data, so anyone can look around before signing up. Then real users beyond me, and later the app stores.</p></div>
+      <div><h3>A front door</h3><p>A landing page that opens instantly, so a first visit doesn't wait on a free server. Then real users beyond me, and later the app stores. The demo, a month of made-up data with no sign-up, went live on 24 October.</p></div>
       <div><h3>Fast from the first tap</h3><p>No minute-long wake-up on the first visit, and screens that feel instant on a mid-range phone.</p></div>
       <div><h3>AI I can stand behind</h3><p>Meal estimates close enough to trust, with the accuracy measured rather than assumed.</p></div>
       <div><h3>Good at the food I eat</h3><p>South Asian and Gulf home cooking: salan, roti, khubz. The big national tables barely cover it, which makes it the place to be best.</p></div>
